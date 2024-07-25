@@ -19,6 +19,9 @@ import m, {
   ObjectModel,
   PrimitiveModel,
   StringModel,
+  type Value,
+  type Extensions,
+  type References,
 } from '../src/index.js';
 
 use(chaiLike);
@@ -54,23 +57,23 @@ describe('@vaadin/hilla-form-models', () => {
     role: Role;
   }
 
-  let NamedModel: ObjectModel<Named, Readonly<{ name: StringModel }>>;
-  let StreetModel: ObjectModel<Street, Readonly<{ building: NumberModel }> & typeof NamedModel>;
-  let AddressModel: ObjectModel<Address, Readonly<{ street: typeof StreetModel }>>;
-  let CommentModel: ObjectModel<Comment, Readonly<{ title: StringModel; text: StringModel }>>;
+  let NamedModel: Model<Named, Readonly<{ name: StringModel }>>;
+  let StreetModel: Model<Street, Readonly<{ building: NumberModel }> & typeof NamedModel>;
+  let AddressModel: Model<Address, Readonly<{ street: typeof StreetModel }>>;
+  let CommentModel: Model<Comment, Readonly<{ title: StringModel; text: StringModel }>>;
   let RoleModel: EnumModel<typeof Role>;
-  let PersonModel: ObjectModel<
+  let PersonModel: Model<
     Person,
     Readonly<{
       name: StringModel;
       address: typeof AddressModel;
-      comments: ArrayModel<typeof CommentModel>;
+      comments: ArrayModel<Value<typeof CommentModel>, Extensions<typeof CommentModel>>;
       role: typeof RoleModel;
     }>
   >;
 
   beforeEach(() => {
-    RoleModel = m.enum(Role, 'Role');
+    RoleModel = m.enumeration(Role, 'Role');
     NamedModel = m.object<Named>('Named').property('name', StringModel).build();
     StreetModel = m.extend(NamedModel).object<Street>('Street').property('building', NumberModel).build();
     AddressModel = m.object<Address>('Address').property('street', StreetModel).build();
@@ -89,7 +92,7 @@ describe('@vaadin/hilla-form-models', () => {
     expect(NamedModel).to.be.instanceof(Model);
     expect(NamedModel).to.have.property($name, 'Named');
     expect(NamedModel).to.have.property('name').which.is.instanceof(StringModel);
-    expect(NamedModel.toString()).to.be.equal('[:detached: / model] Named');
+    expect(NamedModel.toString()).to.be.equal('[:detached: / Symbol(nothing)] Named');
   });
 
   it('should allow model inheritance', () => {
@@ -106,7 +109,7 @@ describe('@vaadin/hilla-form-models', () => {
     expect(AddressModel).to.have.property('street').which.is.instanceof(StreetModel);
     expect(PersonModel.address).to.have.property('street').which.is.instanceof(StreetModel);
     expect(PersonModel.address.street.toString()).to.be.equal(
-      '[[[:detached: / model] Person / address] Address / street] Street',
+      '[[[:detached: / Symbol(nothing)] Person / address] Address / street] Street',
     );
   });
 
@@ -206,7 +209,7 @@ describe('@vaadin/hilla-form-models', () => {
 
     expect(OptionalModel).to.have.property('name').which.is.instanceof(StringModel);
     expect(OptionalModel.name).to.have.property($optional).which.is.true;
-    expect(OptionalModel.name.toString()).to.be.equal('[[:detached: / model] Optional / name?] string');
+    expect(OptionalModel.name.toString()).to.be.equal('[[:detached: / Symbol(nothing)] Optional / name?] string');
   });
 
   describe('m.value', () => {
@@ -217,6 +220,7 @@ describe('@vaadin/hilla-form-models', () => {
         { toString: () => 'Target' },
         {
           value: {
+            writable: true,
             value: {
               name: 'John Doe',
               address: {
@@ -264,6 +268,52 @@ describe('@vaadin/hilla-form-models', () => {
       expect(m.value(AttachedPersonModel.address)).to.be.equal(target.value.address);
       expect(m.value(AttachedPersonModel.address.street)).to.be.equal(target.value.address.street);
     });
+
+    it('sets the value for an attached target', () => {
+      const AttachedPersonModel = m.attach(PersonModel, target);
+      const newValue = {
+        name: 'Jane Doe',
+        address: {
+          street: {
+            name: 'Second Street',
+          },
+        },
+      };
+
+      m.value(AttachedPersonModel, newValue);
+
+      expect(target.value).to.be.equal(newValue);
+    });
+
+    it('sets the nested value for an attached target', () => {
+      const AttachedPersonModel = m.attach(PersonModel, target);
+      const newValue = 'Jane Doe';
+
+      m.value(AttachedPersonModel.name, newValue);
+
+      expect(target.value.name).to.be.equal(newValue);
+    });
+
+    it('throws an error if the value shape does not fit the model shape', () => {
+      const brokenTarget: Target = Object.create(
+        { toString: () => 'Target' },
+        {
+          value: {
+            writable: true,
+            value: {
+              name: 'John Doe',
+            },
+          },
+        },
+      );
+
+      const AttachedPersonModel = m.attach(PersonModel, brokenTarget);
+      const newStreet = { name: 'Main Street' };
+
+      expect(() => m.value(AttachedPersonModel.address.street, newStreet)).to.throw(
+        'The value shape does not fit the model.',
+      );
+    });
   });
 
   describe('Core Models', () => {
@@ -297,14 +347,15 @@ describe('@vaadin/hilla-form-models', () => {
       });
 
       it('should allow to iterate through the item models', () => {
-        const target: Target<Comment[]> = {
+        const target = {
           value: [
             { title: 'FooTitle', text: 'FooText' },
             { title: 'BarTitle', text: 'BarText' },
           ],
         };
 
-        const AttachedCommentsModel = m.attach(m.array(CommentModel), target);
+        const a = m.array(CommentModel);
+        const AttachedCommentsModel = m.attach<Value<typeof a>, Extensions<typeof a>, References<typeof a>>(a, target);
 
         const items = [...m.items(AttachedCommentsModel)];
 

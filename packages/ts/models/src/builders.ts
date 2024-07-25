@@ -4,13 +4,16 @@ import {
   $defaultValue,
   $key,
   $meta,
+  $model,
   $name,
   $owner,
+  $validators,
   type AnyObject,
   type DefaultValueProvider,
   type Model,
   type ModelMetadata,
 } from './model.js';
+import type { Validator } from './validators.js';
 
 const { create, defineProperty } = Object;
 
@@ -21,12 +24,10 @@ export type ModelBuilderPropertyOptions = Readonly<{
   meta?: ModelMetadata;
 }>;
 
-const $model = Symbol('model');
-
 /**
  * The flags for the model constructor that allow to determine specific characteristics of the model.
  */
-export type Flags = {
+export type Flags = Readonly<{
   /**
    * Defines if the model is named.
    */
@@ -43,7 +44,7 @@ export type Flags = {
    * safely set it in the end of building using this flag.
    */
   selfRefKeys: keyof any;
-};
+}>;
 
 /**
  * A builder class for creating all basic models.
@@ -58,14 +59,25 @@ export class CoreModelBuilder<
   EX extends AnyObject = EmptyObject,
   F extends Flags = { named: false; selfRefKeys: never },
 > {
-  protected readonly [$model]: Model<V, EX>;
+  static create<V, EX extends AnyObject, R extends keyof any>(
+    base: Model<V, EX, R>,
+  ): CoreModelBuilder<V, EX, { named: false; selfRefKeys: R }>;
+  static create<V, EX extends AnyObject, R extends keyof any>(
+    base: Model<unknown, EX, R>,
+    defaultValueProvider: (model: Model<unknown, EX, R>) => V,
+  ): CoreModelBuilder<V, EX, { named: false; selfRefKeys: R }>;
+  static create(base: Model, defaultValueProvider?: (model: Model) => unknown): CoreModelBuilder<unknown> {
+    return new CoreModelBuilder(base, defaultValueProvider);
+  }
+
+  protected readonly [$model]: Model<V, EX, F['selfRefKeys']>;
 
   /**
    * @param base - The base model to extend.
    * @param defaultValueProvider - The function that provides the default value
    * for the model.
    */
-  constructor(base: Model, defaultValueProvider?: (model: Model<V, EX>) => V) {
+  protected constructor(base: Model, defaultValueProvider?: (model: Model) => V) {
     this[$model] = create(base);
 
     if (defaultValueProvider) {
@@ -100,7 +112,7 @@ export class CoreModelBuilder<
   define<DK extends symbol, DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
-  ): CoreModelBuilder<V, EX & Readonly<Record<DK, DV>>, F> {
+  ): CoreModelBuilder<V, DK extends keyof Model ? EX : EX & Readonly<Record<DK, DV>>, F> {
     defineProperty(this[$model], key, value);
     return this as any;
   }
@@ -114,9 +126,9 @@ export class CoreModelBuilder<
    * for the model.
    * @returns The current builder instance.
    */
-  defaultValueProvider(defaultValueProvider: DefaultValueProvider<V, EX>): this {
+  defaultValueProvider(defaultValueProvider: DefaultValueProvider<V, EX, F['selfRefKeys']>): this {
     this.define($defaultValue, {
-      get(this: Model<V, EX>) {
+      get(this: Model<V, EX, F['selfRefKeys']>) {
         return defaultValueProvider(this);
       },
     });
@@ -131,8 +143,22 @@ export class CoreModelBuilder<
    * @param name - The name of the model.
    * @returns The current builder instance.
    */
-  name(name: string): CoreModelBuilder<V, EX, { named: true; selfRefKeys: F['selfRefKeys'] }> {
+  name<NV extends V = V>(
+    this: F['named'] extends false ? this : never,
+    name: string,
+  ): CoreModelBuilder<NV, EX, { named: true; selfRefKeys: F['selfRefKeys'] }> {
     return this.define($name, { value: name }) as any;
+  }
+
+  /**
+   * Adds a validator to the model. The validator is a function that checks if
+   * the value is valid according to some criteria.
+   */
+  validator(validator: Validator<V>): this {
+    this.define($validators, {
+      value: [...this[$model][$validators], validator],
+    });
+    return this;
   }
 
   /**
@@ -141,7 +167,7 @@ export class CoreModelBuilder<
    *
    * @returns The model.
    */
-  build(this: F['named'] extends true ? this : never): Model<V, EX> {
+  build(this: F['named'] extends true ? this : never): Model<V, EX, F['selfRefKeys']> {
     return this[$model];
   }
 }
@@ -172,7 +198,13 @@ export class ObjectModelBuilder<
   EX extends AnyObject = EmptyObject,
   F extends Flags = { named: false; selfRefKeys: never },
 > extends CoreModelBuilder<V, EX, F> {
-  constructor(base: Model) {
+  static override create<V extends AnyObject, EX extends AnyObject, R extends keyof any>(
+    base: Model<V, EX, R>,
+  ): ObjectModelBuilder<V, V, EX, { named: false; selfRefKeys: R }> {
+    return new ObjectModelBuilder(base);
+  }
+
+  protected constructor(base: Model) {
     super(base, (m) => {
       const result = create(null);
 
@@ -180,7 +212,7 @@ export class ObjectModelBuilder<
       for (const key in m) {
         defineProperty(result, key, {
           enumerable: true,
-          get: () => (m[key as keyof Model<V, EX>] as Model)[$defaultValue],
+          get: () => (m[key as keyof Model] as Model)[$defaultValue],
         });
       }
 
@@ -194,12 +226,18 @@ export class ObjectModelBuilder<
    *
    * @param name - The name of the model.
    */
-  object<NV extends AnyObject>(
+  object<NV extends V = V>(
     this: F['named'] extends false ? this : never,
     name: string,
   ): ObjectModelBuilder<NV & V, CV, EX, { named: true; selfRefKeys: F['selfRefKeys'] }> {
-    return this.name(name) as any;
+    // @ts-expect-error: too generic
+    return this.name(name);
   }
+
+  declare ['name']: <NV extends V = V>(
+    this: F['named'] extends false ? this : never,
+    name: string,
+  ) => ObjectModelBuilder<NV, CV, EX, { named: true; selfRefKeys: F['selfRefKeys'] }>;
 
   /**
    * {@inheritDoc CoreModelBuilder.define}
@@ -207,7 +245,7 @@ export class ObjectModelBuilder<
   declare ['define']: <DK extends symbol, DV>(
     key: DK,
     value: TypedPropertyDescriptor<DV>,
-  ) => ObjectModelBuilder<V, CV, EX & Readonly<Record<DK, DV>>, F>;
+  ) => ObjectModelBuilder<V, CV, DK extends keyof Model ? EX : EX & Readonly<Record<DK, DV>>, F>;
 
   /**
    * {@inheritDoc CoreModelBuilder.meta}
@@ -262,8 +300,12 @@ export class ObjectModelBuilder<
 
         const props = propertyRegistry.get(this)!;
 
-        props[key] ??= new CoreModelBuilder<V[PK], EXK, { named: true; selfRefKeys: never }>(
-          typeof model === 'function' ? model(this) : model,
+        props[key] ??= (
+          CoreModelBuilder.create(typeof model === 'function' ? model(this) : model) as CoreModelBuilder<
+            V[PK],
+            EXK,
+            { named: true; selfRefKeys: never }
+          >
         )
           .define($key, { value: key })
           .define($owner, { value: this })

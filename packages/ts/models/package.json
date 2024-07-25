@@ -46,7 +46,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@vaadin/hilla-lit-form": "24.5.0-alpha5"
+    "@vaadin/hilla-lit-form": "24.5.0-alpha5",
+    "type-fest": "^4.21.0"
   },
   "peerDependencies": {
     "react": "^18"

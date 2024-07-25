@@ -1,4 +1,5 @@
 import type { EmptyObject } from 'type-fest';
+import type { Validator } from './validators.js';
 
 export interface JvmTypeRef {
   jvmType: string;
@@ -21,23 +22,34 @@ export interface ModelMetadata {
 }
 
 /**
+ * A symbol that represents the `model` property of the target object.
+ */
+export const $model = Symbol('model');
+
+/**
  * The target to which a model is attached. It could be a Binder instance, a
  * Signal or another object. However, it could never be another model.
  */
-export type Target<T = unknown> = Readonly<{
-  model?: Model<T>;
+export interface Target<T = unknown, EX extends AnyObject = EmptyObject, R extends keyof any = never> {
+  /**
+   * The model attached to the target object.
+   */
+  readonly [$model]?: Model<T, EX, R>;
+  /**
+   * The value of the model represents.
+   */
   value: T;
-}>;
+}
 
-export const nothing = Symbol('nothing');
+export const $nothing = Symbol('nothing');
 
 const detachedTarget: Target = Object.create(
   {
     toString: () => ':detached:',
   },
   {
-    model: { value: undefined },
-    value: { value: nothing },
+    [$model]: { value: undefined },
+    value: { value: $nothing },
   },
 );
 
@@ -72,9 +84,9 @@ export const $meta = Symbol('meta');
 export const $optional = Symbol('optional');
 
 /**
- * The symbol that represents the {@link Model[$value]} property.
+ * The symbol that represents the {@link Model[$defaultValue]} property.
  */
-export const $defaultValue = Symbol('value');
+export const $defaultValue = Symbol('defaultValue');
 
 /**
  * The symbol that represents the {@link EnumModel[$enumerate]} property.
@@ -91,6 +103,11 @@ export const $members = Symbol('members');
  */
 export const $itemModel = Symbol('itemModel');
 
+/**
+ * The symbol that represents the {@link Model[$validators]} property.
+ */
+export const $validators = Symbol('validators');
+
 /* eslint-enable tsdoc/syntax */
 
 /**
@@ -101,7 +118,7 @@ export type Value<M extends Model> = M extends Model<infer T> ? T : never;
 /**
  * Extracts the list of extra properties of the model.
  */
-export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : EmptyObject;
+export type Extensions<M extends Model> = M extends Model<unknown, infer EX> ? EX : never;
 
 /**
  * Extracts the list of self-referencing properties of the model.
@@ -157,6 +174,11 @@ export type Model<V = unknown, EX extends AnyObject = EmptyObject, R extends key
     [$optional]: boolean;
 
     /**
+     * The list of validators that validate the data described by the model.
+     */
+    [$validators]: readonly Validator[];
+
+    /**
      * The default value of the model.
      */
     [$defaultValue]: V;
@@ -178,7 +200,7 @@ export type DefaultValueProvider<V, EX extends AnyObject = EmptyObject, R extend
 
 export const Model: Model = Object.create(null, {
   [$key]: {
-    value: 'model',
+    value: $nothing,
   },
   [$name]: {
     value: 'Model',
@@ -189,6 +211,9 @@ export const Model: Model = Object.create(null, {
   [$meta]: {},
   [$optional]: {
     value: false,
+  },
+  [$validators]: {
+    value: [],
   },
   [$defaultValue]: {},
   [Symbol.toStringTag]: {
