@@ -14,11 +14,10 @@ import {
   isObjectSchema,
   isReferenceSchema,
   type ObjectSchema,
-} from '@vaadin/hilla-generator-core/Schema.js';
-import {
   convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
-} from '@vaadin/hilla-generator-core/utils.js';
+} from '@vaadin/hilla-generator-core/Schema.js';
+import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
@@ -28,6 +27,7 @@ import ts, {
   type SourceFile,
   type Statement,
   type TypeElement,
+  type TypeParameterDeclaration,
 } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import { findTypeParameters } from './utils.js';
@@ -38,16 +38,18 @@ export class EntityProcessor {
   readonly #fullyQualifiedName: string;
   readonly #name: string;
   readonly #outputPathManager = new PathManager({ extension: 'ts' });
+  readonly #transferTypes: TransferTypes;
   readonly #owner: Plugin;
   readonly #path: string;
 
-  constructor(name: string, component: Schema, owner: Plugin) {
+  constructor(name: string, component: Schema, storage: SharedStorage, owner: Plugin) {
     this.#component = component;
     this.#owner = owner;
     this.#fullyQualifiedName = name;
     this.#name = simplifyFullyQualifiedName(name);
     this.#path = convertFullyQualifiedNameToRelativePath(name);
     this.#dependencies = new DependencyManager(new PathManager({ extension: '.js', relativeTo: dirname(this.#path) }));
+    this.#transferTypes = storage.transferTypes;
   }
 
   get #id(): Identifier {
@@ -159,7 +161,7 @@ export class EntityProcessor {
 
   #processTypeElements({ properties }: ObjectSchema): readonly TypeElement[] {
     return Object.entries(properties ?? {}).map(([name, schema]) => {
-      const [type] = new TypeSchemaProcessor(schema, this.#dependencies).process();
+      const [type] = new TypeSchemaProcessor(schema, this.#dependencies, this.#transferTypes).process();
 
       return ts.factory.createPropertySignature(
         undefined,
@@ -170,7 +172,7 @@ export class EntityProcessor {
     });
   }
 
-  static #processTypeParameters(schema: Schema): readonly ts.TypeParameterDeclaration[] | undefined {
+  static #processTypeParameters(schema: Schema): readonly TypeParameterDeclaration[] | undefined {
     return findTypeParameters(schema)
       ?.map(String)
       .map((name) =>

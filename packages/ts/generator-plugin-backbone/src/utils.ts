@@ -3,6 +3,9 @@ import {
   type AllOfRuleComposedSchema,
   type Schema,
 } from '@vaadin/hilla-generator-core/Schema.js';
+import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
+import type { NamedImportManager } from '@vaadin/hilla-generator-utils/dependencies/ImportManager.js';
+import type { Identifier } from 'typescript';
 
 export const defaultMediaType = 'application/json';
 

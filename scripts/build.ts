@@ -11,7 +11,7 @@ const scriptsDir = new URL('./', import.meta.url);
 const packageRoot = pathToFileURL(process.cwd() + sep);
 const [packageJsonFile, srcFiles] = await Promise.all([
   readFile(new URL('package.json', packageRoot), 'utf8'),
-  glob('src/**/*.{ts,tsx,obj.css}', { ignore: ['**/*.d.ts'] }),
+  glob('src/**/*.{ts,tsx,obj.css}', { ignore: ['**/*.d.ts', '**/*.t.ts'] }),
 ]);
 
 const packageJson: PackageJson = JSON.parse(packageJsonFile);
@@ -55,7 +55,7 @@ await build({
   // Adds a __REGISTER__ function definition everywhere in the built code where
   // the call for that function exists.
   inject: [fileURLToPath(new URL('./register.js', scriptsDir))],
-  entryPoints: srcFiles.map((file) => new URL(file, packageRoot)).map(fileURLToPath),
+  entryPoints: srcFiles.map((file) => new URL(file, packageRoot)).map((url) => fileURLToPath(url)),
   format: 'esm',
   outdir: fileURLToPath(packageRoot),
   packages: 'external',

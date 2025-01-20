@@ -41,11 +41,8 @@
     "./Schema.js": {
       "default": "./Schema.js"
     },
-    "./SharedStorage.js": {
-      "types": "./SharedStorage.d.ts"
-    },
-    "./utils.js": {
-      "default": "./utils.js"
+    "./SharedStorage.t.js": {
+      "types": "./SharedStorage.t.d.ts"
     }
   },
   "repository": {

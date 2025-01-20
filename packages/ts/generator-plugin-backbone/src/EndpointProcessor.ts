@@ -1,4 +1,5 @@
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
+import type { SharedStorage, TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
@@ -6,26 +7,19 @@ import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.
 import { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
-import EndpointMethodOperationProcessor, {
-  HILLA_FRONTEND_NAME,
-  INIT_TYPE_NAME,
-} from './EndpointMethodOperationProcessor.js';
+import EndpointMethodOperationProcessor from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {
   static async create(
     name: string,
-    owner: Plugin,
     methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
-    outputDir?: string,
+    storage: SharedStorage,
+    owner: Plugin,
   ): Promise<EndpointProcessor> {
-    const endpoint = new EndpointProcessor(name, owner, methods, outputDir);
+    const endpoint = new EndpointProcessor(name, methods, storage, owner);
     endpoint.#dependencies.imports.default.add(
-      endpoint.#dependencies.paths.createRelativePath(await ClientPlugin.getClientFileName(outputDir)),
+      endpoint.#dependencies.paths.createRelativePath(await ClientPlugin.getClientFileName(storage.outputDir)),
       'client',
-    );
-    endpoint.#dependencies.imports.named.add(
-      endpoint.#dependencies.paths.createBareModulePath(HILLA_FRONTEND_NAME),
-      INIT_TYPE_NAME,
     );
     return endpoint;
   }
@@ -35,18 +29,20 @@ export default class EndpointProcessor {
   readonly #methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
   readonly #name: string;
   readonly #outputDir: string | undefined;
+  readonly #transferTypes: TransferTypes;
   readonly #owner: Plugin;
 
   private constructor(
     name: string,
-    owner: Plugin,
     methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
-    outputDir?: string,
+    storage: SharedStorage,
+    owner: Plugin,
   ) {
     this.#name = name;
     this.#owner = owner;
     this.#methods = methods;
-    this.#outputDir = outputDir;
+    this.#outputDir = storage.outputDir;
+    this.#transferTypes = storage.transferTypes;
   }
 
   async process(): Promise<SourceFile> {
@@ -81,6 +77,7 @@ export default class EndpointProcessor {
               method,
               pathItem[httpMethod]!,
               this.#dependencies,
+              this.#transferTypes,
               this.#owner,
             )?.process(this.#outputDir),
           ),

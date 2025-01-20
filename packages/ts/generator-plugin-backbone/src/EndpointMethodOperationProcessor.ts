@@ -1,5 +1,6 @@
 /* eslint-disable max-params */
 import type Plugin from '@vaadin/hilla-generator-core/Plugin.js';
+import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import equal from 'fast-deep-equal';
@@ -11,9 +12,6 @@ import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.j
 
 export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
 
-export const INIT_TYPE_NAME = 'EndpointRequestInit';
-export const HILLA_FRONTEND_NAME = '@vaadin/hilla-frontend';
-
 export default abstract class EndpointMethodOperationProcessor {
   static createProcessor(
     httpMethod: OpenAPIV3.HttpMethods,
@@ -21,6 +19,7 @@ export default abstract class EndpointMethodOperationProcessor {
     endpointMethodName: string,
     operation: EndpointMethodOperation,
     dependencies: DependencyManager,
+    transferTypes: TransferTypes,
     owner: Plugin,
   ): EndpointMethodOperationProcessor | undefined {
     switch (httpMethod) {
@@ -31,6 +30,7 @@ export default abstract class EndpointMethodOperationProcessor {
           endpointMethodName,
           operation,
           dependencies,
+          transferTypes,
           owner,
         );
       default:
@@ -44,6 +44,7 @@ export default abstract class EndpointMethodOperationProcessor {
 
 class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProcessor {
   readonly #dependencies: DependencyManager;
+  readonly #transferTypes: TransferTypes;
   readonly #endpointMethodName: string;
   readonly #endpointName: string;
   readonly #operation: EndpointMethodOperation;
@@ -54,6 +55,7 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     endpointMethodName: string,
     operation: EndpointMethodOperation,
     dependencies: DependencyManager,
+    transferTypes: TransferTypes,
     owner: Plugin,
   ) {
     super();
@@ -62,21 +64,18 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
     this.#endpointName = endpointName;
     this.#endpointMethodName = endpointMethodName;
     this.#operation = operation;
+    this.#transferTypes = transferTypes;
   }
 
   async process(outputDir?: string): Promise<Statement | undefined> {
     const { exports, imports, paths } = this.#dependencies;
     this.#owner.logger.debug(`${this.#endpointName}.${this.#endpointMethodName} - processing POST method`);
-    const initTypeIdentifier = imports.named.getIdentifier(
-      paths.createBareModulePath(HILLA_FRONTEND_NAME),
-      INIT_TYPE_NAME,
-    )!;
 
     const { initParam, packedParameters, parameters } = new EndpointMethodRequestBodyProcessor(
       this.#operation.requestBody,
       this.#dependencies,
+      this.#transferTypes,
       this.#owner,
-      initTypeIdentifier,
     ).process();
 
     const methodIdentifier = exports.named.add(this.#endpointMethodName);
@@ -113,7 +112,13 @@ class EndpointMethodOperationPOSTProcessor extends EndpointMethodOperationProces
 
     const responseTypes = Object.entries(this.#operation.responses)
       .flatMap(([code, response]) =>
-        new EndpointMethodResponseProcessor(code, response, this.#dependencies, this.#owner).process(),
+        new EndpointMethodResponseProcessor(
+          code,
+          response,
+          this.#dependencies,
+          this.#transferTypes,
+          this.#owner,
+        ).process(),
       )
       .filter((value, index, arr) => arr.findIndex((v) => equal(v, value)) === index);
 

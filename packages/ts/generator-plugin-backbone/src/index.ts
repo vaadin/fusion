@@ -1,5 +1,5 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
+import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';
@@ -53,8 +53,8 @@ export default class BackbonePlugin extends Plugin {
       });
 
     const processors = await Promise.all(
-      [...endpoints.entries()].map(async ([endpointName, methods]) =>
-        EndpointProcessor.create(endpointName, this, methods, storage.outputDir),
+      Array.from(endpoints.entries(), async ([endpointName, methods]) =>
+        EndpointProcessor.create(endpointName, methods, storage, this),
       ),
     );
 
@@ -66,7 +66,7 @@ export default class BackbonePlugin extends Plugin {
 
     return storage.api.components?.schemas
       ? Object.entries(storage.api.components.schemas).map(([name, component]) =>
-          new EntityProcessor(name, component, this).process(),
+          new EntityProcessor(name, component, storage, this).process(),
         )
       : [];
   }

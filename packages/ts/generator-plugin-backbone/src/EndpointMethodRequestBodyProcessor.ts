@@ -5,10 +5,11 @@ import {
   type NonEmptyObjectSchema,
   type Schema,
 } from '@vaadin/hilla-generator-core/Schema.js';
+import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { ReadonlyDeep } from 'type-fest';
-import ts, { type ObjectLiteralExpression, type ParameterDeclaration } from 'typescript';
+import ts, { type Identifier, type ObjectLiteralExpression, type ParameterDeclaration } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import { defaultMediaType } from './utils.js';
 
@@ -17,41 +18,48 @@ export type EndpointMethodRequestBody = ReadonlyDeep<OpenAPIV3.RequestBodyObject
 export type EndpointMethodRequestBodyProcessingResult = Readonly<{
   parameters: readonly ParameterDeclaration[];
   packedParameters?: ObjectLiteralExpression;
-  initParam: ts.Identifier;
+  initParam: Identifier;
 }>;
 
-export default class EndpointMethodRequestBodyProcessor {
-  static readonly #defaultInitParamName = 'init';
+const DEFAULT_INIT_PARAM_NAME = 'init';
+const INIT_TYPE_NAME = 'EndpointRequestInit';
+const HILLA_FRONTEND_NAME = '@vaadin/hilla-frontend';
 
+export default class EndpointMethodRequestBodyProcessor {
   readonly #dependencies: DependencyManager;
+  readonly #transferTypes: TransferTypes;
   readonly #owner: Plugin;
   readonly #requestBody?: EndpointMethodRequestBody;
-  readonly #initTypeIdentifier: ts.Identifier;
 
   constructor(
     requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
     dependencies: DependencyManager,
+    transferTypes: TransferTypes,
     owner: Plugin,
-    initTypeIdentifier: ts.Identifier,
   ) {
     this.#owner = owner;
     this.#dependencies = dependencies;
     this.#requestBody = requestBody ? owner.resolver.resolve(requestBody) : undefined;
-    this.#initTypeIdentifier = initTypeIdentifier;
+    this.#transferTypes = transferTypes;
   }
 
   process(): EndpointMethodRequestBodyProcessingResult {
+    const { imports, paths } = this.#dependencies;
+    const path = paths.createBareModulePath(HILLA_FRONTEND_NAME);
+    const initTypeIdentifier =
+      imports.named.getIdentifier(path, INIT_TYPE_NAME) ?? imports.named.add(path, INIT_TYPE_NAME);
+
     if (!this.#requestBody) {
       return {
-        initParam: ts.factory.createIdentifier(EndpointMethodRequestBodyProcessor.#defaultInitParamName),
+        initParam: ts.factory.createIdentifier(DEFAULT_INIT_PARAM_NAME),
         packedParameters: ts.factory.createObjectLiteralExpression(),
         parameters: [
           ts.factory.createParameterDeclaration(
             undefined,
             undefined,
-            EndpointMethodRequestBodyProcessor.#defaultInitParamName,
+            DEFAULT_INIT_PARAM_NAME,
             ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-            ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
+            ts.factory.createTypeReferenceNode(initTypeIdentifier),
           ),
         ],
       };
@@ -59,7 +67,7 @@ export default class EndpointMethodRequestBodyProcessor {
 
     const parameterData = this.#extractParameterData(this.#requestBody.content[defaultMediaType].schema);
     const parameterNames = parameterData.map(([name]) => name);
-    let initParamName = EndpointMethodRequestBodyProcessor.#defaultInitParamName;
+    let initParamName = DEFAULT_INIT_PARAM_NAME;
 
     while (parameterNames.includes(initParamName)) {
       initParamName = `_${initParamName}`;
@@ -72,7 +80,7 @@ export default class EndpointMethodRequestBodyProcessor {
       ),
       parameters: [
         ...parameterData.map(([name, schema]) => {
-          const nodes = new TypeSchemaProcessor(schema, this.#dependencies).process();
+          const nodes = new TypeSchemaProcessor(schema, this.#dependencies, this.#transferTypes).process();
 
           return ts.factory.createParameterDeclaration(
             undefined,
@@ -87,7 +95,7 @@ export default class EndpointMethodRequestBodyProcessor {
           undefined,
           initParamName,
           ts.factory.createToken(ts.SyntaxKind.QuestionToken),
-          ts.factory.createTypeReferenceNode(this.#initTypeIdentifier),
+          ts.factory.createTypeReferenceNode(initTypeIdentifier),
         ),
       ],
     };
