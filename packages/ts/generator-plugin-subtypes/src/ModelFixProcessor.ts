@@ -1,21 +1,15 @@
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import ts, { type ClassDeclaration, type GetAccessorDeclaration } from 'typescript';
-
-function propertyNameToString(node: ts.PropertyName): string | null {
-  if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
-    return node.text;
-  }
-  return null;
-}
+import ts, { type SourceFile } from 'typescript';
+import { propertyNameToString } from './utils.js';
 
 export class ModelFixProcessor {
-  readonly #source: ts.SourceFile;
+  readonly #source: SourceFile;
 
-  constructor(source: ts.SourceFile) {
+  constructor(source: SourceFile) {
     this.#source = source;
   }
 
-  process(): ts.SourceFile {
+  process(): SourceFile {
     const statements = this.#source.statements.map((statement) => {
       // filter out the @type property from all models
       if (ts.isClassDeclaration(statement)) {

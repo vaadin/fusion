@@ -1,15 +1,9 @@
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
-import ts from 'typescript';
-
-function propertyNameToString(node: ts.PropertyName): string | null {
-  if (ts.isIdentifier(node) || ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
-    return node.text;
-  }
-  return null;
-}
+import ts, { type SourceFile } from 'typescript';
+import { propertyNameToString } from './utils.js';
 
 export class TypeFixProcessor {
-  readonly #source: ts.SourceFile;
+  readonly #source: SourceFile;
   readonly #typeValue: string;
 
   constructor(source: ts.SourceFile, typeValue: string) {
@@ -17,7 +11,7 @@ export class TypeFixProcessor {
     this.#typeValue = typeValue;
   }
 
-  process(): ts.SourceFile {
+  process(): SourceFile {
     const statements = this.#source.statements.map((statement) => {
       // search in the interface definition
       if (ts.isInterfaceDeclaration(statement)) {
