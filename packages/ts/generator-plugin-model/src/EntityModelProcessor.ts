@@ -1,6 +1,7 @@
 /* eslint-disable symbol-description */
 import { dirname } from 'path/posix';
 import {
+  convertFullyQualifiedNameToRelativePath,
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
@@ -11,11 +12,8 @@ import {
   type ObjectSchema,
   type ReferenceSchema,
   type Schema,
-} from '@vaadin/hilla-generator-core/Schema.js';
-import {
-  convertFullyQualifiedNameToRelativePath,
   simplifyFullyQualifiedName,
-} from '@vaadin/hilla-generator-core/utils.js';
+} from '@vaadin/hilla-generator-core/Schema.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
@@ -27,7 +25,7 @@ import ts, {
   type Statement,
 } from 'typescript';
 import { ModelSchemaExpressionProcessor, ModelSchemaTypeProcessor } from './ModelSchemaProcessor.js';
-import { importBuiltInFormModel, type Context, createModelBuildingCallback, createEmptyValueMaker } from './utils.js';
+import { type Context, createEmptyValueMaker, createModelBuildingCallback, importBuiltInFormModel } from './utils.js';
 
 export type DependencyData = Readonly<{
   id: Identifier;
