@@ -5,14 +5,13 @@ import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js'
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
 import { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile, Statement } from 'typescript';
 import EndpointMethodOperationProcessor from './EndpointMethodOperationProcessor.js';
 
 export default class EndpointProcessor {
   static async create(
     name: string,
-    methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
+    methods: Map<string, OpenAPIV3.PathItemObject>,
     storage: SharedStorage,
     owner: Plugin,
   ): Promise<EndpointProcessor> {
@@ -26,7 +25,7 @@ export default class EndpointProcessor {
 
   readonly #createdFilePaths = new PathManager({ extension: 'ts' });
   readonly #dependencies = new DependencyManager(new PathManager({ extension: '.js' }));
-  readonly #methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
+  readonly #methods: Map<string, OpenAPIV3.PathItemObject>;
   readonly #name: string;
   readonly #outputDir: string | undefined;
   readonly #transferTypes: TransferTypes;
@@ -34,7 +33,7 @@ export default class EndpointProcessor {
 
   private constructor(
     name: string,
-    methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>,
+    methods: Map<string, OpenAPIV3.PathItemObject>,
     storage: SharedStorage,
     owner: Plugin,
   ) {
@@ -60,10 +59,7 @@ export default class EndpointProcessor {
     );
   }
 
-  async #processMethod(
-    method: string,
-    pathItem: ReadonlyDeep<OpenAPIV3.PathItemObject>,
-  ): Promise<readonly Statement[]> {
+  async #processMethod(method: string, pathItem: OpenAPIV3.PathItemObject): Promise<readonly Statement[]> {
     this.#owner.logger.debug(`Processing endpoint method: ${this.#name}.${method}`);
 
     return (

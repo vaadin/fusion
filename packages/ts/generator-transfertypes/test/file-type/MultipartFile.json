@@ -1,0 +1,60 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "Hilla Application",
+    "version" : "1.0.0"
+  },
+  "servers" : [
+    {
+      "url" : "http://localhost:8080/connect",
+      "description" : "Hilla Backend"
+    }
+  ],
+  "tags" : [
+    {
+      "name" : "MultipartFileEndpoint",
+      "x-class-name" : "com.vaadin.hilla.parser.plugins.transfertypes.file.MultipartFileEndpoint"
+    }
+  ],
+  "paths" : {
+    "/MultipartFileEndpoint/uploadFile" : {
+      "post" : {
+        "tags" : [
+          "MultipartFileEndpoint"
+        ],
+        "operationId" : "MultipartFileEndpoint_uploadFile_POST",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "nullable" : true,
+                    "anyOf" : [
+                      {
+                        "$ref" : "#/components/schemas/com.vaadin.hilla.runtime.transfertypes.File"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : ""
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "com.vaadin.hilla.runtime.transfertypes.File" : {
+        "type" : "object"
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
-  "name": "@vaadin/hilla-generator-plugin-subtypes",
+  "name": "@vaadin/hilla-generator-plugin-transfertypes",
   "version": "24.7.0-alpha8",
-  "description": "A Hilla TypeScript Generator plugin to support JsonSubTypes",
+  "description": "A plugin to replace types in the generated code",
   "main": "index.js",
   "type": "module",
   "engines": {
@@ -14,9 +14,9 @@
     "build:copy": "cd src && copyfiles **/*.d.ts ..",
     "lint": "eslint src test",
     "lint:fix": "eslint src test --fix",
-    "test": "mocha test/**/*.spec.ts --config ../../../.mocharc.cjs",
-    "test:update": "npm run test -- --update",
-    "test:coverage": "c8 --experimental-monocart -c ../../../.c8rc.json npm test",
+    "test": "vitest --run",
+    "test:update": "vitest --update",
+    "test:coverage": "vitest --coverage",
     "typecheck": "tsc --noEmit"
   },
   "exports": {
@@ -30,7 +30,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/vaadin/hilla.git",
-    "directory": "packages/ts/generator-plugin-subtypes"
+    "directory": "packages/ts/generator-plugin-transfertypes"
   },
   "keywords": [
     "hilla",
@@ -56,26 +56,23 @@
     "@vaadin/hilla-generator-utils": "24.7.0-alpha8",
     "fast-deep-equal": "^3.1.3",
     "openapi-types": "^12.1.3",
-    "typescript": "^5.6.2"
+    "typescript": "5.7.3"
   },
   "devDependencies": {
     "@types/chai": "^4.3.20",
-    "@types/mocha": "^10.0.10",
     "@types/node": "^20.17.12",
     "@types/sinon": "^10.0.20",
     "@types/sinon-chai": "^3.2.12",
     "@vaadin/hilla-generator-core": "24.7.0-alpha8",
-    "@vaadin/hilla-generator-plugin-client": "24.7.0-alpha8",
-    "@vaadin/hilla-generator-plugin-model": "24.7.0-alpha8",
-    "c8": "^10.1.3",
+    "@vaadin/hilla-generator-plugin-backbone": "^24.7.0-alpha8",
     "chai": "^4.5.0",
+    "chai-as-promised": "^8.0.1",
     "concurrently": "^9.1.2",
     "copyfiles": "^2.4.1",
-    "mocha": "^11.1.0",
-    "monocart-coverage-reports": "^2.11.5",
     "pino": "^9.6.0",
     "sinon": "^16.1.3",
     "sinon-chai": "^3.7.0",
-    "type-fest": "^4.32.0"
+    "type-fest": "^4.32.0",
+    "vitest": "^3.0.2"
   }
 }

@@ -12,6 +12,7 @@ import org.jspecify.annotations.NonNull;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.vaadin.hilla.mappedtypes.Order;
 import com.vaadin.hilla.mappedtypes.Pageable;
 import com.vaadin.hilla.mappedtypes.Sort;
@@ -25,29 +26,29 @@ import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.nodes.CompositeTypeSignatureNode;
-import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.runtime.transfertypes.EndpointSubscription;
+import com.vaadin.hilla.runtime.transfertypes.File;
 import com.vaadin.hilla.runtime.transfertypes.Flux;
 
 public final class TransferTypesPlugin
-        extends AbstractPlugin<PluginConfiguration> {
+    extends AbstractPlugin<PluginConfiguration> {
     static private final Map<String, Class<?>> classMap = new HashMap<>();
 
     static {
         classMap.put("org.springframework.data.domain.Page", List.class);
         classMap.put("org.springframework.data.domain.Pageable",
-                Pageable.class);
+            Pageable.class);
         classMap.put("org.springframework.data.domain.Sort$Order", Order.class);
         classMap.put("org.springframework.data.domain.Sort", Sort.class);
         classMap.put(UUID.class.getName(), String.class);
         classMap.put("reactor.core.publisher.Flux", Flux.class);
         classMap.put("com.vaadin.hilla.EndpointSubscription",
-                EndpointSubscription.class);
+            EndpointSubscription.class);
         classMap.put(JsonNode.class.getName(), Object.class);
         classMap.put(ObjectNode.class.getName(), Object.class);
         classMap.put(ArrayNode.class.getName(), List.class);
+        classMap.put("org.springframework.web.multipart.MultipartFile", File.class);
     }
 
     public TransferTypesPlugin() {
@@ -71,7 +72,7 @@ public final class TransferTypesPlugin
     @Override
     public NodeDependencies scan(@NonNull NodeDependencies nodeDependencies) {
         return nodeDependencies.processChildNodes(this::processNodes)
-                .processRelatedNodes(this::processNodes);
+            .processRelatedNodes(this::processNodes);
     }
 
     private Node<?, ?> mapClassRefNodes(Node<?, ?> node) {
@@ -99,6 +100,6 @@ public final class TransferTypesPlugin
 
         var mappedClassInfo = ClassInfoModel.of(classMap.get(className));
         return ClassRefSignatureModel.of(mappedClassInfo,
-                classRef.getTypeArguments(), classRef.getAnnotations());
+            classRef.getTypeArguments(), classRef.getAnnotations());
     }
 }

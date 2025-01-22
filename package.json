@@ -30,7 +30,9 @@
   "license": "Apache-2.0",
   "overrides": {
     "esbuild": "$esbuild",
-    "prettier": "$prettier"
+    "prettier": "$prettier",
+    "react": "18 || 19",
+    "chai": "5"
   },
   "devDependencies": {
     "@nx/js": "^20.3.1",
@@ -38,7 +40,7 @@
     "@remcovaes/web-test-runner-vite-plugin": "^1.2.2",
     "@types/karma": "^6.3.9",
     "@types/node": "^22.10.5",
-    "@vaadin/react-components": "24.7.0-alpha5",
+    "@vaadin/react-components": "24.7.0-alpha6",
     "@vitejs/plugin-react": "^4.3.4",
     "@web/test-runner": "^0.19.0",
     "chai-dom": "^1.12.0",

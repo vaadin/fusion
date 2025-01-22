@@ -5,12 +5,11 @@ import ClientPlugin from '@vaadin/hilla-generator-plugin-client';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import equal from 'fast-deep-equal';
 import { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
 import ts, { type Expression, type Statement, type TypeNode } from 'typescript';
 import EndpointMethodRequestBodyProcessor from './EndpointMethodRequestBodyProcessor.js';
 import EndpointMethodResponseProcessor from './EndpointMethodResponseProcessor.js';
 
-export type EndpointMethodOperation = ReadonlyDeep<OpenAPIV3.OperationObject>;
+export type EndpointMethodOperation = OpenAPIV3.OperationObject;
 
 export default abstract class EndpointMethodOperationProcessor {
   static createProcessor(

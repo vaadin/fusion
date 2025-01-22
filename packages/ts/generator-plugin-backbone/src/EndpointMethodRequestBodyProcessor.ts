@@ -8,12 +8,11 @@ import {
 import type { TransferTypes } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
 import ts, { type Identifier, type ObjectLiteralExpression, type ParameterDeclaration } from 'typescript';
 import TypeSchemaProcessor from './TypeSchemaProcessor.js';
 import { defaultMediaType } from './utils.js';
 
-export type EndpointMethodRequestBody = ReadonlyDeep<OpenAPIV3.RequestBodyObject>;
+export type EndpointMethodRequestBody = OpenAPIV3.RequestBodyObject;
 
 export type EndpointMethodRequestBodyProcessingResult = Readonly<{
   parameters: readonly ParameterDeclaration[];
@@ -32,7 +31,7 @@ export default class EndpointMethodRequestBodyProcessor {
   readonly #requestBody?: EndpointMethodRequestBody;
 
   constructor(
-    requestBody: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject> | undefined,
+    requestBody: OpenAPIV3.ReferenceObject | OpenAPIV3.RequestBodyObject | undefined,
     dependencies: DependencyManager,
     transferTypes: TransferTypes,
     owner: Plugin,
@@ -102,7 +101,7 @@ export default class EndpointMethodRequestBodyProcessor {
   }
 
   #extractParameterData(
-    basicSchema?: ReadonlyDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>,
+    basicSchema?: OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject,
   ): Array<readonly [string, Schema]> {
     if (!basicSchema) {
       return [];

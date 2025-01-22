@@ -19,7 +19,7 @@ export default abstract class Plugin {
 
   abstract get path(): string;
 
-  abstract execute(storage: SharedStorage): Promise<void>;
+  abstract execute(storage: SharedStorage): Promise<void> | void;
 }
 
 export type PluginConstructor = Constructor<Plugin, ConstructorParameters<typeof Plugin>>;
