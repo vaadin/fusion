@@ -65,6 +65,7 @@
     "@types/sinon-chai": "^3.2.12",
     "@vaadin/hilla-generator-core": "24.7.0-alpha8",
     "@vaadin/hilla-generator-plugin-backbone": "^24.7.0-alpha8",
+    "@vitest/coverage-v8": "^3.0.3",
     "chai": "^4.5.0",
     "chai-as-promised": "^8.0.1",
     "concurrently": "^9.1.2",
