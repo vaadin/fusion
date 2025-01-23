@@ -37,6 +37,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNullApi;
@@ -97,7 +98,7 @@ public class EndpointInvoker {
      *            the registry used to store endpoint information
      */
     public EndpointInvoker(ApplicationContext applicationContext,
-            ObjectMapper endpointObjectMapper,
+            @Qualifier("hillaEndpointObjectMapper") ObjectMapper endpointObjectMapper,
             ExplicitNullableTypeChecker explicitNullableTypeChecker,
             ServletContext servletContext, EndpointRegistry endpointRegistry) {
         this.applicationContext = applicationContext;
