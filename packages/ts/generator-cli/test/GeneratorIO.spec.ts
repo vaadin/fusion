@@ -2,7 +2,6 @@ import { statSync } from 'node:fs';
 import { chmod, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import File from '@vaadin/hilla-generator-core/File.js';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
 import { expect, use } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
