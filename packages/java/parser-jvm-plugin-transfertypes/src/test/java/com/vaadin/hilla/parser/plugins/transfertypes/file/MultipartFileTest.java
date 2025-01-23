@@ -17,13 +17,13 @@ public class MultipartFileTest {
 
     @Test
     public void should_ReplaceMultipartFileClassWithLocalFileClass()
-        throws IOException, URISyntaxException {
+            throws IOException, URISyntaxException {
         var openAPI = new Parser()
-            .classPath(Set.of(helper.getTargetDir().toString()))
-            .endpointAnnotations(List.of(Endpoint.class))
-            .addPlugin(new BackbonePlugin())
-            .addPlugin(new TransferTypesPlugin())
-            .execute(List.of(MultipartFileEndpoint.class));
+                .classPath(Set.of(helper.getTargetDir().toString()))
+                .endpointAnnotations(List.of(Endpoint.class))
+                .addPlugin(new BackbonePlugin())
+                .addPlugin(new TransferTypesPlugin())
+                .execute(List.of(MultipartFileEndpoint.class));
 
         helper.executeParserWithConfig(openAPI);
     }
