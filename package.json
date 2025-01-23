@@ -31,7 +31,8 @@
   "overrides": {
     "esbuild": "$esbuild",
     "prettier": "$prettier",
-    "react": "18 || 19",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
     "chai": "5"
   },
   "devDependencies": {
@@ -69,7 +70,6 @@
     "nx": "^20.3.1",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
-    "react-dom": "^18.3.1",
     "simple-git-hooks": "^2.11.1",
     "sync-request": "^6.1.0",
     "tsx": "^4.19.2",
