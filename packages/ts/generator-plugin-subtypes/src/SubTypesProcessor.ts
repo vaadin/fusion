@@ -1,4 +1,4 @@
-import { dirname } from 'path/posix';
+import { dirname } from 'node:path/posix';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
@@ -8,15 +8,16 @@ import {
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
+import type { OpenAPIV3 } from 'openapi-types';
 import ts, { type SourceFile } from 'typescript';
 
 export class SubTypesProcessor {
   readonly #typeName: string;
   readonly #source: SourceFile;
-  readonly #oneOf: ReferenceSchema[];
+  readonly #oneOf: readonly ReferenceSchema[];
   readonly #dependencies;
 
-  constructor(typeName: string, source: SourceFile, oneOf: ReferenceSchema[]) {
+  constructor(typeName: string, source: SourceFile, oneOf: readonly ReferenceSchema[]) {
     this.#typeName = typeName;
     this.#source = source;
     this.#oneOf = oneOf;

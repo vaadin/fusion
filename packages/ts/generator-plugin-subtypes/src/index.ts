@@ -1,5 +1,5 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import { convertFullyQualifiedNameToRelativePath, type ReferenceSchema } from '@vaadin/hilla-generator-core/Schema.js';
+import { convertFullyQualifiedNameToRelativePath, isReferenceSchema } from '@vaadin/hilla-generator-core/Schema.js';
 import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import { ModelFixProcessor } from './ModelFixProcessor.js';
 import { SubTypesProcessor } from './SubTypesProcessor.js';
@@ -28,13 +28,17 @@ export default class SubTypesPlugin extends Plugin {
         const fn = `${convertFullyQualifiedNameToRelativePath(baseKey)}.ts`;
         const source = sources.find(({ fileName }) => fileName === fn)!;
         // replace the (empty) source with a newly-generated one
-        const newSource = new SubTypesProcessor(baseKey, source, baseComponent.oneOf).process();
+        const newSource = new SubTypesProcessor(
+          baseKey,
+          source,
+          baseComponent.oneOf.filter((schema) => isReferenceSchema(schema)),
+        ).process();
         sources.splice(sources.indexOf(source), 1, newSource);
 
         // mentioned types in the oneOf need to be fixed as well
         baseComponent.oneOf.forEach((schema) => {
           if ('$ref' in schema) {
-            const path = (schema as ReferenceSchema).$ref;
+            const path = schema.$ref;
             Object.entries(components).forEach(([subKey, subComponent]) => {
               if ('anyOf' in subComponent && subKey === path.substring('#/components/schemas/'.length)) {
                 subComponent.anyOf?.forEach((s) => {
