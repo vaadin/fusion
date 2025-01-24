@@ -14,7 +14,7 @@ on:
       - 'packages/**/README.md'
       - 'scripts/generator/templates/**/*.md'
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [ opened, synchronize, reopened ]
     paths-ignore:
       - 'hilla-logo.svg'
       - 'README.md'
@@ -34,6 +34,7 @@ jobs:
     timeout-minutes: 5
     env:
       NX_SKIP_NX_CACHE: true
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
 
     steps:
       - uses: actions-cool/check-user-permission@main

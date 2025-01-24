@@ -4,16 +4,16 @@ import './enable-feature-flag.js';
 import { render } from '@testing-library/react';
 import CookieManager from '@vaadin/hilla-frontend/CookieManager.js';
 import { effect, useComputed, useSignalEffect } from '@vaadin/hilla-react-signals';
-import { expect, use } from 'chai';
 import fetchMock from 'fetch-mock';
 import { useEffect, useMemo } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { describe, it, beforeEach, afterEach, expect, chai } from 'vitest';
 import { FormatCache } from '../src/FormatCache.js';
 import { i18n as globalI18n, I18n, translate as globalTranslate } from '../src/index.js';
 import type { LanguageSettings } from '../src/settings.js';
 
-use(sinonChai);
+chai.use(sinonChai);
 
 describe('@vaadin/hilla-react-i18n', () => {
   describe('i18n', () => {

@@ -13,6 +13,8 @@ inputs:
 
 runs:
   using: composite
+  env:
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4

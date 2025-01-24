@@ -18,7 +18,7 @@ import {
   UnauthorizedResponseError,
   type FluxConnection,
 } from '../src/index.js';
-import type { Vaadin, VaadinGlobal } from '../src/types.js';
+import type { Vaadin, VaadinGlobal } from '../src/types.t.js';
 import { subscribeStub } from './mocks/atmosphere.js';
 import { fluxConnectionSubscriptionStubs } from './mocks/FluxConnection.js';
 import {
