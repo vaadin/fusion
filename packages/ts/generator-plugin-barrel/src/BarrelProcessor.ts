@@ -6,7 +6,7 @@ import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.
 import type { SourceFile } from 'typescript';
 
 export default class BarrelProcessor {
-  static readonly BARREL_FILE_NAME = 'endpoints.ts';
+  static readonly BARREL_FILE_NAME = 'endpoints';
   declare ['constructor']: typeof BarrelProcessor;
   readonly #endpoints: readonly SourceFile[];
   readonly #outputPathManager = new PathManager({ extension: 'ts' });
@@ -18,7 +18,7 @@ export default class BarrelProcessor {
   }
 
   process(): SourceFile {
-    this.#owner.logger.debug(`Generating '${this.constructor.BARREL_FILE_NAME}' file`);
+    this.#owner.logger.debug(`Generating '${this.constructor.BARREL_FILE_NAME}.ts' file`);
 
     const { exports, imports } = this.#endpoints.reduce(
       (acc, { fileName }) => {
@@ -35,7 +35,7 @@ export default class BarrelProcessor {
 
     return createSourceFile(
       [...imports.toCode(), ...exports.toCode()],
-      this.#outputPathManager.createRelativePath('endpoints'),
+      this.#outputPathManager.createRelativePath(this.constructor.BARREL_FILE_NAME),
     );
   }
 }

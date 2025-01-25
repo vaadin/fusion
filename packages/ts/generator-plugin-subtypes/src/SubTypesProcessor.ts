@@ -1,22 +1,23 @@
-import { dirname } from 'path/posix';
+import { dirname } from 'node:path/posix';
 import {
   convertReferenceSchemaToPath,
   convertReferenceSchemaToSpecifier,
   type ReferenceSchema,
+  simplifyFullyQualifiedName,
 } from '@vaadin/hilla-generator-core/Schema.js';
-import { simplifyFullyQualifiedName } from '@vaadin/hilla-generator-core/utils.js';
 import createSourceFile from '@vaadin/hilla-generator-utils/createSourceFile.js';
 import DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import PathManager from '@vaadin/hilla-generator-utils/dependencies/PathManager.js';
-import ts from 'typescript';
+import type { OpenAPIV3 } from 'openapi-types';
+import ts, { type SourceFile } from 'typescript';
 
 export class SubTypesProcessor {
   readonly #typeName: string;
-  readonly #source: ts.SourceFile;
-  readonly #oneOf: ReferenceSchema[];
+  readonly #source: SourceFile;
+  readonly #oneOf: readonly ReferenceSchema[];
   readonly #dependencies;
 
-  constructor(typeName: string, source: ts.SourceFile, oneOf: ReferenceSchema[]) {
+  constructor(typeName: string, source: SourceFile, oneOf: readonly ReferenceSchema[]) {
     this.#typeName = typeName;
     this.#source = source;
     this.#oneOf = oneOf;
@@ -25,17 +26,17 @@ export class SubTypesProcessor {
     );
   }
 
-  process(): ts.SourceFile {
+  process(): SourceFile {
     const { exports, imports, paths } = this.#dependencies;
 
-    // import all sub types and return them
+    // import all subtypes and return them
     const subTypes = this.#oneOf.map((schema) => {
       const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
       const subType = convertReferenceSchemaToSpecifier(schema);
       return imports.default.add(path, subType, true);
     });
 
-    // create a union type from the sub types
+    // create a union type from the subtypes
     const union = ts.factory.createUnionTypeNode(
       subTypes.map((subType) => ts.factory.createTypeReferenceNode(subType)),
     );

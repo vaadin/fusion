@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "target": "es2022"
+    "target": "es2021"
   },
   "include": ["src", "test"],
   "exclude": ["test/**/*.snap.ts"]

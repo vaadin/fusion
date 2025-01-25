@@ -1,11 +1,9 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
+import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyObjectDeep } from 'type-fest/source/readonly-deep';
 import { type EndpointOperations, PushProcessor } from './PushProcessor.js';
 
-type ExtendedMediaTypeSchema = Readonly<{ 'x-class-name': string }> &
-  ReadonlyObjectDeep<OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject>;
+type ExtendedMediaTypeSchema = { 'x-class-name': string } & (OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject);
 
 const classesToReplace: readonly string[] = [
   'com.vaadin.hilla.runtime.transfertypes.Flux',
@@ -16,9 +14,9 @@ export default class PushPlugin extends Plugin {
   /**
    * Collects methods that must be patched by checking their `x-class-name` value
    */
-  static #collectPatchableMethods(paths: ReadonlyObjectDeep<OpenAPIV3.PathsObject>) {
+  static #collectPatchableMethods(paths: OpenAPIV3.PathsObject) {
     return Object.entries(paths).reduce((acc, [key, path]) => {
-      const response = path?.post?.responses[200] as ReadonlyObjectDeep<OpenAPIV3.ResponseObject> | undefined;
+      const response = path?.post?.responses[200] as OpenAPIV3.ResponseObject | undefined;
       const schema = response?.content?.['application/json']?.schema as ExtendedMediaTypeSchema | undefined;
       const className = schema?.['x-class-name'];
       const [, endpoint, method] = key.split('/');

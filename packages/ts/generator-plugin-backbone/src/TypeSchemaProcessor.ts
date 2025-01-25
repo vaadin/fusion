@@ -1,6 +1,7 @@
 import {
   type ArraySchema,
-  convertReferenceSchemaToPath,
+  convertFullyQualifiedNameToRelativePath,
+  convertReferenceSchemaToFullyQualifiedName,
   convertReferenceSchemaToSpecifier,
   decomposeSchema,
   isArraySchema,
@@ -17,6 +18,7 @@ import {
   type ReferenceSchema,
   type Schema,
 } from '@vaadin/hilla-generator-core/Schema.js';
+import type { TransferTypeMaker } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import type DependencyManager from '@vaadin/hilla-generator-utils/dependencies/DependencyManager.js';
 import ts, { type TypeNode } from 'typescript';
 import { findTypeArguments, findTypeVariable } from './utils.js';
@@ -55,10 +57,12 @@ export default class TypeSchemaProcessor {
   declare ['constructor']: typeof TypeSchemaProcessor;
   readonly #dependencies: DependencyManager;
   readonly #schema: Schema;
+  readonly #transferTypes: Map<string, TransferTypeMaker>;
 
-  constructor(schema: Schema, dependencies: DependencyManager) {
+  constructor(schema: Schema, dependencies: DependencyManager, transferTypes: Map<string, TransferTypeMaker>) {
     this.#schema = schema;
     this.#dependencies = dependencies;
+    this.#transferTypes = transferTypes;
   }
 
   process(): readonly TypeNode[] {
@@ -93,7 +97,7 @@ export default class TypeSchemaProcessor {
   }
 
   #processArray(schema: ArraySchema): TypeNode {
-    const nodes = new TypeSchemaProcessor(schema.items, this.#dependencies).process();
+    const nodes = new TypeSchemaProcessor(schema.items, this.#dependencies, this.#transferTypes).process();
 
     return ts.factory.createTypeReferenceNode('Array', [ts.factory.createUnionTypeNode(nodes)]);
   }
@@ -102,7 +106,7 @@ export default class TypeSchemaProcessor {
     let valuesTypeNode: TypeNode;
 
     if (typeof valuesType !== 'boolean') {
-      const nodes = new TypeSchemaProcessor(valuesType, this.#dependencies).process();
+      const nodes = new TypeSchemaProcessor(valuesType, this.#dependencies, this.#transferTypes).process();
       valuesTypeNode = ts.factory.createUnionTypeNode(nodes);
     } else {
       valuesTypeNode = ts.factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
@@ -114,18 +118,24 @@ export default class TypeSchemaProcessor {
     ]);
   }
 
-  #processTypeArguments(schema: Schema): readonly ts.TypeNode[] | undefined {
+  #processTypeArguments(schema: Schema): readonly TypeNode[] | undefined {
     // Type arguments are processed recursively
     return findTypeArguments(schema)
-      ?.allOf.map((s) => new TypeSchemaProcessor(s, this.#dependencies).process())
+      ?.allOf.map((s) => new TypeSchemaProcessor(s, this.#dependencies, this.#transferTypes).process())
       .map((t) => ts.factory.createUnionTypeNode(t));
   }
 
-  #processReference(schema: ReferenceSchema, typeArguments: readonly ts.TypeNode[] | undefined): TypeNode {
+  #processReference(schema: ReferenceSchema, typeArguments: readonly TypeNode[] | undefined): TypeNode {
     const { imports, paths } = this.#dependencies;
 
+    const fullyQualifiedName = convertReferenceSchemaToFullyQualifiedName(schema);
+
+    if (this.#transferTypes.has(fullyQualifiedName)) {
+      return this.#transferTypes.get(fullyQualifiedName)!(typeArguments);
+    }
+
     const specifier = convertReferenceSchemaToSpecifier(schema);
-    const path = paths.createRelativePath(convertReferenceSchemaToPath(schema));
+    const path = paths.createRelativePath(convertFullyQualifiedNameToRelativePath(fullyQualifiedName));
 
     const identifier = imports.default.getIdentifier(path) ?? imports.default.add(path, specifier, true);
 

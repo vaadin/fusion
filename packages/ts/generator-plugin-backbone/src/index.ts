@@ -1,7 +1,6 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
+import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';
 import EndpointProcessor from './EndpointProcessor.js';
 import { EntityProcessor } from './EntityProcessor.js';
@@ -33,14 +32,14 @@ export default class BackbonePlugin extends Plugin {
 
   async #processEndpoints(storage: SharedStorage): Promise<readonly SourceFile[]> {
     this.logger.debug('Processing endpoints');
-    const endpoints = new Map<string, Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>>();
+    const endpoints = new Map<string, Map<string, OpenAPIV3.PathItemObject>>();
 
     Object.entries(storage.api.paths)
       .filter(([, pathItem]) => !!pathItem)
       .forEach(([path, pathItem]) => {
         const [, endpointName, endpointMethodName] = path.split('/');
 
-        let methods: Map<string, ReadonlyDeep<OpenAPIV3.PathItemObject>>;
+        let methods: Map<string, OpenAPIV3.PathItemObject>;
 
         if (endpoints.has(endpointName)) {
           methods = endpoints.get(endpointName)!;
@@ -53,8 +52,8 @@ export default class BackbonePlugin extends Plugin {
       });
 
     const processors = await Promise.all(
-      [...endpoints.entries()].map(async ([endpointName, methods]) =>
-        EndpointProcessor.create(endpointName, this, methods, storage.outputDir),
+      Array.from(endpoints.entries(), async ([endpointName, methods]) =>
+        EndpointProcessor.create(endpointName, methods, storage, this),
       ),
     );
 
@@ -66,7 +65,7 @@ export default class BackbonePlugin extends Plugin {
 
     return storage.api.components?.schemas
       ? Object.entries(storage.api.components.schemas).map(([name, component]) =>
-          new EntityProcessor(name, component, this).process(),
+          new EntityProcessor(name, component, storage, this).process(),
         )
       : [];
   }

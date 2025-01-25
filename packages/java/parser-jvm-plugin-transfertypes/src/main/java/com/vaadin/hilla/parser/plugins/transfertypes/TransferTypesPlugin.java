@@ -12,6 +12,7 @@ import org.jspecify.annotations.NonNull;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import com.vaadin.hilla.mappedtypes.Order;
 import com.vaadin.hilla.mappedtypes.Pageable;
 import com.vaadin.hilla.mappedtypes.Sort;
@@ -25,10 +26,9 @@ import com.vaadin.hilla.parser.models.ClassInfoModel;
 import com.vaadin.hilla.parser.models.ClassRefSignatureModel;
 import com.vaadin.hilla.parser.models.SignatureModel;
 import com.vaadin.hilla.parser.plugins.backbone.BackbonePlugin;
-import com.vaadin.hilla.parser.plugins.backbone.nodes.CompositeTypeSignatureNode;
-import com.vaadin.hilla.parser.plugins.backbone.nodes.TypeSignatureNode;
 import com.vaadin.hilla.parser.plugins.backbone.nodes.TypedNode;
 import com.vaadin.hilla.runtime.transfertypes.EndpointSubscription;
+import com.vaadin.hilla.runtime.transfertypes.File;
 import com.vaadin.hilla.runtime.transfertypes.Flux;
 
 public final class TransferTypesPlugin
@@ -48,6 +48,8 @@ public final class TransferTypesPlugin
         classMap.put(JsonNode.class.getName(), Object.class);
         classMap.put(ObjectNode.class.getName(), Object.class);
         classMap.put(ArrayNode.class.getName(), List.class);
+        classMap.put("org.springframework.web.multipart.MultipartFile",
+                File.class);
     }
 
     public TransferTypesPlugin() {

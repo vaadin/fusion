@@ -1,7 +1,6 @@
 import Plugin from '@vaadin/hilla-generator-core/Plugin.js';
-import type SharedStorage from '@vaadin/hilla-generator-core/SharedStorage.js';
+import type { SharedStorage } from '@vaadin/hilla-generator-core/SharedStorage.t.js';
 import type { OpenAPIV3 } from 'openapi-types';
-import type { ReadonlyDeep } from 'type-fest';
 import type { SourceFile } from 'typescript';
 import { EntityModelProcessor } from './EntityModelProcessor.js';
 import type { Context } from './utils.js';
@@ -27,7 +26,7 @@ export default class ModelPlugin extends Plugin {
     storage.pluginStorage.set(this.constructor.MODEL_PLUGIN_FILE_TAGS, this.#tags);
   }
 
-  #processEntities(schemas: ReadonlyDeep<OpenAPIV3.ComponentsObject>['schemas'] | undefined): readonly SourceFile[] {
+  #processEntities(schemas: OpenAPIV3.ComponentsObject['schemas'] | undefined): readonly SourceFile[] {
     this.logger.debug('Processing entities');
 
     if (!schemas) {

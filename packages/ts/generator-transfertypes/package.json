@@ -1,0 +1,79 @@
+{
+  "name": "@vaadin/hilla-generator-plugin-transfertypes",
+  "version": "24.7.0-alpha8",
+  "description": "A plugin to replace types in the generated code",
+  "main": "index.js",
+  "type": "module",
+  "engines": {
+    "node": ">= 16.13"
+  },
+  "scripts": {
+    "clean:build": "git clean -fx . -e .vite -e node_modules",
+    "build": "concurrently npm:build:*",
+    "build:transpile": "tsc --isolatedModules -p tsconfig.build.json",
+    "build:copy": "cd src && copyfiles **/*.d.ts ..",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "test": "vitest --run",
+    "test:update": "vitest --update",
+    "test:coverage": "vitest --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    ".": {
+      "default": "./index.js"
+    },
+    "./index.js": {
+      "default": "./index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vaadin/hilla.git",
+    "directory": "packages/ts/generator-plugin-transfertypes"
+  },
+  "keywords": [
+    "hilla",
+    "typescript",
+    "generator"
+  ],
+  "author": "Vaadin Ltd.",
+  "license": "Apache 2.0",
+  "bugs": {
+    "url": "https://github.com/vaadin/hilla/issues"
+  },
+  "homepage": "https://hilla.dev",
+  "files": [
+    "*.{d.ts.map,d.ts,js.map,js}"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@vaadin/hilla-generator-core": "24.7.0-alpha8",
+    "@vaadin/hilla-generator-plugin-client": "24.7.0-alpha8",
+    "@vaadin/hilla-generator-plugin-model": "24.7.0-alpha8",
+    "@vaadin/hilla-generator-utils": "24.7.0-alpha8",
+    "fast-deep-equal": "^3.1.3",
+    "openapi-types": "^12.1.3",
+    "typescript": "5.7.3"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.20",
+    "@types/node": "^20.17.12",
+    "@types/sinon": "^10.0.20",
+    "@types/sinon-chai": "^3.2.12",
+    "@vaadin/hilla-generator-core": "24.7.0-alpha8",
+    "@vaadin/hilla-generator-plugin-backbone": "^24.7.0-alpha8",
+    "@vitest/coverage-v8": "^3.0.3",
+    "chai": "^4.5.0",
+    "chai-as-promised": "^8.0.1",
+    "concurrently": "^9.1.2",
+    "copyfiles": "^2.4.1",
+    "pino": "^9.6.0",
+    "sinon": "^16.1.3",
+    "sinon-chai": "^3.7.0",
+    "type-fest": "^4.32.0",
+    "vitest": "^3.0.2"
+  }
+}
