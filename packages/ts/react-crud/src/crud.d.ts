@@ -1,4 +1,4 @@
-import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import type FilterUnion from './types/com/vaadin/flow/spring/data/filter/FilterUnion.js';
 import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
 
 export interface FormService<T> {

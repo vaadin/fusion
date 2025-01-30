@@ -14,7 +14,12 @@ package com.vaadin.hilla.crud.filter;
  * <li>Do the actual comparison using the matcher / operator provided by
  * {@link #getMatcher()}</li>
  * </ul>
+ *
+ * @deprecated Use
+ *             {@link com.vaadin.flow.spring.data.filter.PropertyStringFilter}
+ *             instead
  */
+@Deprecated(forRemoval = true)
 public class PropertyStringFilter extends Filter {
     public enum Matcher {
         EQUALS, CONTAINS, LESS_THAN, GREATER_THAN;

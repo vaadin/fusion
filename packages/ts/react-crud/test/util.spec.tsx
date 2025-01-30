@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { isFilterEmpty } from '../src/util';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
-import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher';
+import type FilterUnion from '../types/com/vaadin/flow/spring/data/filter/FilterUnion';
+import Matcher from '../types/com/vaadin/flow/spring/data/filter/PropertyStringFilter/Matcher';
 
 describe('@vaadin/hilla-react-crud', () => {
   describe('util', () => {

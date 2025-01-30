@@ -1,42 +1,40 @@
-import { TextField } from '@vaadin/react-components/TextField.js';
-import { AutoGrid, HeaderFilterRendererProps } from '@vaadin/hilla-react-crud';
-import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
-import Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person';
-import { PersonService } from 'Frontend/generated/endpoints.js';
+import { AutoGrid, type HeaderFilterRendererProps } from '@vaadin/hilla-react-crud';
 import { GridColumn } from '@vaadin/react-components/GridColumn';
-import type FilterUnion from 'Frontend/generated/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import type OrFilter from 'Frontend/generated/com/vaadin/hilla/crud/filter/OrFilter.js';
+import { TextField } from '@vaadin/react-components/TextField.js';
+import type FilterUnion from 'Frontend/generated/com/vaadin/flow/spring/data/filter/FilterUnion';
+import type OrFilter from 'Frontend/generated/com/vaadin/flow/spring/data/filter/OrFilter';
+import type Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person';
+import PersonModel from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/PersonModel.js';
+import { PersonService } from 'Frontend/generated/endpoints.js';
 
-const HeaderFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => {
-  return (
-    <TextField
-      id="filter"
-      style={{ width: '20em' }}
-      placeholder="Search for first or last name"
-      onValueChanged={({ detail: { value } }) => {
-        const firstNameFilter = {
-          '@type': 'propertyString',
-          propertyId: 'firstName',
-          matcher: 'CONTAINS',
-          filterValue: value,
-        };
-        const lastNameFilter = {
-          '@type': 'propertyString',
-          propertyId: 'lastName',
-          matcher: 'CONTAINS',
-          filterValue: value,
-        };
+const HeaderFilterRenderer = ({ setFilter }: HeaderFilterRendererProps) => (
+  <TextField
+    id="filter"
+    style={{ width: '20em' }}
+    placeholder="Search for first or last name"
+    onValueChanged={({ detail: { value } }) => {
+      const firstNameFilter = {
+        '@type': 'propertyString',
+        propertyId: 'firstName',
+        matcher: 'CONTAINS',
+        filterValue: value,
+      };
+      const lastNameFilter = {
+        '@type': 'propertyString',
+        propertyId: 'lastName',
+        matcher: 'CONTAINS',
+        filterValue: value,
+      };
 
-        const filter: OrFilter = {
-          '@type': 'or',
-          children: [firstNameFilter, lastNameFilter],
-        };
+      const filter: OrFilter = {
+        '@type': 'or',
+        children: [firstNameFilter, lastNameFilter],
+      };
 
-        setFilter(filter as FilterUnion);
-      }}
-    ></TextField>
-  );
-};
+      setFilter(filter as FilterUnion);
+    }}
+  ></TextField>
+);
 
 const FullNameRenderer = ({ item }: { item: Person }): React.JSX.Element => (
   <span>

@@ -21,7 +21,11 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * A browser-callable service that delegates list operations to a JPA
  * repository.
+ *
+ * @deprecated Use {@link com.vaadin.flow.spring.data.jpa.ListRepositoryService}
+ *             instead
  */
+@Deprecated(forRemoval = true)
 @EndpointExposed
 public class ListRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         implements ListService<T>, GetService<T, ID>, CountService {

@@ -1,14 +1,14 @@
 import { useDataProvider } from '@vaadin/hilla-react-crud';
-import type Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person.js';
-import { PersonService } from 'Frontend/generated/endpoints.js';
+import { Button } from '@vaadin/react-components/Button.js';
 import { Grid } from '@vaadin/react-components/Grid';
 import { GridSortColumn } from '@vaadin/react-components/GridSortColumn';
-import { Button } from '@vaadin/react-components/Button.js';
 import { TextField } from '@vaadin/react-components/TextField.js';
-import PropertyStringFilter from 'Frontend/generated/com/vaadin/hilla/crud/filter/PropertyStringFilter';
 import { useState } from 'react';
-import Matcher from 'Frontend/generated/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher';
+import type PropertyStringFilter from 'Frontend/generated/com/vaadin/flow/spring/data/filter/PropertyStringFilter';
+import Matcher from 'Frontend/generated/com/vaadin/flow/spring/data/filter/PropertyStringFilter/Matcher';
 import Gender from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person/Gender';
+import type Person from 'Frontend/generated/com/vaadin/hilla/test/reactgrid/Person.js';
+import { PersonService } from 'Frontend/generated/endpoints.js';
 
 type GridBodyReactRendererProps<TItem> = {
   item: TItem;

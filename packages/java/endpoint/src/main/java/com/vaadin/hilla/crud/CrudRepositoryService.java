@@ -12,7 +12,11 @@ import com.vaadin.hilla.EndpointExposed;
 /**
  * A browser-callable service that delegates crud operations to a JPA
  * repository.
+ *
+ * @deprecated Use {@link com.vaadin.flow.spring.data.jpa.CrudRepositoryService}
+ *             instead
  */
+@Deprecated(forRemoval = true)
 @EndpointExposed
 public class CrudRepositoryService<T, ID, R extends CrudRepository<T, ID> & JpaSpecificationExecutor<T>>
         extends ListRepositoryService<T, ID, R> implements CrudService<T, ID> {

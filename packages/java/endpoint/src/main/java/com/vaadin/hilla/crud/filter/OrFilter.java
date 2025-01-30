@@ -7,7 +7,10 @@ import java.util.List;
  * <p>
  * Custom filter implementations need to handle this filter by running all child
  * filters and verifying that at least one of them passes.
+ *
+ * @deprecated Use {@link com.vaadin.flow.spring.data.filter.OrFilter} instead
  */
+@Deprecated(forRemoval = true)
 public class OrFilter extends Filter {
 
     private List<Filter> children;

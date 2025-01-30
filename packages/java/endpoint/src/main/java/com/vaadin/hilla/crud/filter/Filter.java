@@ -15,11 +15,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * <li>{@link PropertyStringFilter} - Matches a specific property, or nested
  * property path, against a filter value, using a specific operator.</li>
  * </ul>
+ *
+ * @deprecated Use {@link com.vaadin.flow.spring.data.filter.Filter} instead
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY)
 @JsonSubTypes({ @Type(value = OrFilter.class, name = "or"),
         @Type(value = AndFilter.class, name = "and"),
         @Type(value = PropertyStringFilter.class, name = "propertyString") })
+@Deprecated(forRemoval = true)
 public class Filter {
 
 }

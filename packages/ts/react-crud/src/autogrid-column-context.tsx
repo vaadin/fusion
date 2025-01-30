@@ -3,7 +3,7 @@ import { type Dispatch, type SetStateAction, createContext, type ComponentType }
 import type { ColumnOptions } from './autogrid-columns';
 import type { HeaderFilterRendererProps } from './header-filter';
 import type { PropertyInfo } from './model-info';
-import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
+import type FilterUnion from './types/com/vaadin/flow/spring/data/filter/FilterUnion';
 
 export interface SorterState {
   direction: GridSorterDirection;

@@ -12,13 +12,13 @@ import type { HeaderFilterRendererProps } from '../header-filter';
 import { AutoGrid, type AutoGridProps, type AutoGridRef } from '../src/autogrid.js';
 import type { CountService, CrudService } from '../src/crud.js';
 import { LocaleContext } from '../src/locale.js';
-import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
-import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
-import type PropertyStringFilter from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
+import type AndFilter from '../src/types/com/vaadin/flow/spring/data/filter/AndFilter.js';
+import Matcher from '../src/types/com/vaadin/flow/spring/data/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../src/types/com/vaadin/flow/spring/data/filter/PropertyStringFilter.js';
 import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion';
+import type FilterUnion from '../types/com/vaadin/flow/spring/data/filter/FilterUnion';
 import GridController from './GridController.js';
 import SelectController from './SelectController.js';
 import {

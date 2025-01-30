@@ -10,8 +10,8 @@ import {
   makeObjectEmptyValueCreator,
 } from '@vaadin/hilla-lit-form';
 import type { CountService, CrudService, ListService } from '../src/crud.js';
-import type FilterUnion from '../src/types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import Matcher from '../src/types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type FilterUnion from '../src/types/com/vaadin/flow/spring/data/filter/FilterUnion.js';
+import Matcher from '../src/types/com/vaadin/flow/spring/data/filter/PropertyStringFilter/Matcher.js';
 import type Pageable from '../src/types/com/vaadin/hilla/mappedtypes/Pageable.js';
 import type Sort from '../src/types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from '../src/types/org/springframework/data/domain/Sort/Direction.js';

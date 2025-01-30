@@ -12,7 +12,11 @@ import com.vaadin.hilla.crud.filter.PropertyStringFilter;
  * filter specifications. This class can be used to implement filtering for
  * custom {@link ListService} or {@link CrudService} implementations that use
  * JPA as the data source.
+ *
+ * @deprecated Use {@link com.vaadin.flow.spring.data.jpa.JpaFilterConverter}
+ *             instead
  */
+@Deprecated(forRemoval = true)
 public final class JpaFilterConverter {
 
     private JpaFilterConverter() {

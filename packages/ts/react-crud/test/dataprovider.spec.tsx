@@ -13,10 +13,10 @@ import {
   type ItemCounts,
 } from '../src/data-provider.js';
 import NullHandling from '../src/types/org/springframework/data/domain/Sort/NullHandling.js';
-import type AndFilter from '../types/com/vaadin/hilla/crud/filter/AndFilter.js';
-import type FilterUnion from '../types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import Matcher from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
-import type PropertyStringFilter from '../types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
+import type AndFilter from '../types/com/vaadin/flow/spring/data/filter/AndFilter.js';
+import type FilterUnion from '../types/com/vaadin/flow/spring/data/filter/FilterUnion.js';
+import Matcher from '../types/com/vaadin/flow/spring/data/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from '../types/com/vaadin/flow/spring/data/filter/PropertyStringFilter.js';
 import type Pageable from '../types/com/vaadin/hilla/mappedtypes/Pageable.js';
 
 use(sinonChai);
