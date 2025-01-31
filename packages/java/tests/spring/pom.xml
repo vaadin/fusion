@@ -189,6 +189,8 @@
                 <module>react-grid-test</module>
                 <module>react-signals</module>
                 <module>react-i18n</module>
+
+                <module>no-endpoints</module>
             </modules>
         </profile>
 
@@ -215,6 +217,7 @@
                 <module>security-contextpath</module>
                 <module>security-jwt</module>
                 <module>security-urlmapping</module>
+                <module>no-endpoints</module>
             </modules>
         </profile>
 

@@ -15,8 +15,11 @@
  */
 package com.vaadin.hilla;
 
+import com.vaadin.hilla.signals.handler.SignalsHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -77,7 +80,8 @@ public class EndpointController {
      */
     public static final String ENDPOINT_MAPPER_FACTORY_BEAN_QUALIFIER = "endpointMapperFactory";
 
-    private static final String SIGNALS_HANDLER_BEAN_NAME = "signalsHandler";
+    private static final Set<Class<?>> INTERNAL_BROWSER_CALLABLES = Set
+            .of(SignalsHandler.class);
 
     private final ApplicationContext context;
 
@@ -123,7 +127,12 @@ public class EndpointController {
         endpointBeans.putAll(context.getBeansWithAnnotation(Endpoint.class));
         endpointBeans
                 .putAll(context.getBeansWithAnnotation(BrowserCallable.class));
+        if (!endpointBeans.isEmpty()) {
+            HillaStats.reportHasEndpoint();
+        }
 
+        INTERNAL_BROWSER_CALLABLES.stream().map(context::getBeansOfType)
+                .forEach(endpointBeans::putAll);
         var currentEndpointNames = endpointBeans.values().stream()
                 .map(endpointRegistry::registerEndpoint)
                 .collect(Collectors.toSet());
@@ -131,16 +140,11 @@ public class EndpointController {
         endpointRegistry.getEndpoints().keySet()
                 .retainAll(currentEndpointNames);
 
-        endpointBeans.keySet().stream()
-                .filter(name -> !name.equals(SIGNALS_HANDLER_BEAN_NAME))
-                .findAny().ifPresent(name -> HillaStats.reportHasEndpoint());
-
         // Temporary Hack
         VaadinService vaadinService = VaadinService.getCurrent();
         if (vaadinService != null) {
             this.vaadinService = vaadinService;
         }
-
     }
 
     /**

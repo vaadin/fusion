@@ -18,18 +18,18 @@ package com.vaadin.hilla.signals.handler;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import com.vaadin.hilla.BrowserCallable;
 import com.vaadin.hilla.EndpointInvocationException;
 import com.vaadin.hilla.signals.core.event.ListStateEvent;
 import com.vaadin.hilla.signals.core.registry.SecureSignalsRegistry;
 import jakarta.annotation.Nullable;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 /**
  * Handler Endpoint for Fullstack Signals' subscription and update events.
  */
 @AnonymousAllowed
-@BrowserCallable
+@Component
 public class SignalsHandler {
 
     private static final String FEATURE_FLAG_ERROR_MESSAGE = """

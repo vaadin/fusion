@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 
-public class TaskGenerateEndpointTest extends TaskTest {
+public class TaskGenerateEndpointTest extends EndpointsTaskTest {
 
     private Path outputDirectory;
     private TaskGenerateEndpoint taskGenerateEndpoint;

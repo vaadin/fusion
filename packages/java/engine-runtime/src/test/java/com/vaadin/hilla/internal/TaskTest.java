@@ -3,31 +3,22 @@ package com.vaadin.hilla.internal;
 import static com.vaadin.flow.server.frontend.FrontendUtils.PARAM_FRONTEND_DIR;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
-import com.vaadin.hilla.ApplicationContextProvider;
-import com.vaadin.hilla.internal.fixtures.CustomEndpoint;
-import com.vaadin.hilla.internal.fixtures.EndpointNoValue;
-import com.vaadin.hilla.internal.fixtures.MyEndpoint;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.OpenAPIV3Parser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.hilla.engine.EngineConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = { CustomEndpoint.class, EndpointNoValue.class,
-        MyEndpoint.class, ApplicationContextProvider.class })
 public class TaskTest {
     private Path temporaryDirectory;
 
     @BeforeEach
-    public void setUpTaskApplication() throws IOException, URISyntaxException,
-            FrontendUtils.CommandExecutionException, InterruptedException {
+    public void setUpTaskApplication() throws IOException {
         temporaryDirectory = Files.createTempDirectory(getClass().getName());
         temporaryDirectory.toFile().deleteOnExit();
         var userDir = temporaryDirectory.toAbsolutePath().toString();
@@ -40,39 +31,6 @@ public class TaskTest {
         var frontendDir = getTemporaryDirectory()
                 .resolve(getFrontendDirectory());
         Files.createDirectories(frontendDir);
-
-        Path packagesPath = Path
-                .of(getClass().getClassLoader().getResource("").toURI())
-                .getParent() // target
-                .getParent() // engine-runtime
-                .getParent() // java
-                .getParent(); // packages
-
-        Path projectRoot = packagesPath.getParent();
-        Files.copy(projectRoot.resolve(".npmrc"),
-                temporaryDirectory.resolve(".npmrc"));
-        var tsPackagesDirectory = packagesPath.resolve("ts");
-
-        var shellCmd = FrontendUtils.isWindows() ? Stream.of("cmd.exe", "/c")
-                : Stream.<String> empty();
-
-        var npmCmd = Stream.of("npm", "--no-update-notifier", "--no-audit",
-                "install", "--no-save", "--install-links");
-
-        var generatorFiles = Files.list(tsPackagesDirectory)
-                .map(Path::toString);
-
-        var command = Stream.of(shellCmd, npmCmd, generatorFiles)
-                .flatMap(Function.identity()).toList();
-
-        var processBuilder = FrontendUtils.createProcessBuilder(command)
-                .directory(temporaryDirectory.toFile())
-                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                .redirectError(ProcessBuilder.Redirect.INHERIT);
-        var exitCode = processBuilder.start().waitFor();
-        if (exitCode != 0) {
-            throw new FrontendUtils.CommandExecutionException(exitCode);
-        }
     }
 
     @AfterEach
@@ -110,5 +68,10 @@ public class TaskTest {
                 .baseDir(getTemporaryDirectory()).buildDir(getBuildDirectory())
                 .outputDir(getOutputDirectory()).withDefaultAnnotations()
                 .build();
+    }
+
+    protected OpenAPI getGeneratedOpenAPI() {
+        return new OpenAPIV3Parser()
+                .read(getOpenAPIFile().toFile().getAbsolutePath());
     }
 }

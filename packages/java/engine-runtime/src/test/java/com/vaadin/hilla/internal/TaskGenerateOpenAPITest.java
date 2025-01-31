@@ -23,15 +23,12 @@ import org.junit.jupiter.api.Test;
 
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-
 /**
  * This test suite is only for triggering the OpenAPI generator. For the actual
  * content of the generator, they are tested in other package
  * {@link com.vaadin.hilla.generator}
  */
-public class TaskGenerateOpenAPITest extends TaskTest {
+public class TaskGenerateOpenAPITest extends EndpointsTaskTest {
 
     private TaskGenerateOpenAPI taskGenerateOpenApi;
 
@@ -99,10 +96,5 @@ public class TaskGenerateOpenAPITest extends TaskTest {
 
         assertEquals("Hilla Backend", servers.get(0).getDescription(),
                 "Generated OpenAPI should have default server description");
-    }
-
-    private OpenAPI getGeneratedOpenAPI() {
-        return new OpenAPIV3Parser()
-                .read(getOpenAPIFile().toFile().getAbsolutePath());
     }
 }
