@@ -21,6 +21,7 @@ import com.vaadin.hilla.engine.EngineConfiguration
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.internal.provider.DefaultListProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSet
@@ -33,6 +34,8 @@ import java.util.stream.Stream
  * The main class of the Hilla Gradle Plugin
  */
 public class HillaPlugin : Plugin<Project> {
+    private val JSR_305_STRICT = "-Xjsr305=strict"
+    private val EMIT_JVM_TYPE_ANNOTATIONS = "-Xemit-jvm-type-annotations"
 
     override fun apply(project: Project) {
         // we need Java Plugin conventions so that we can ensure the order of tasks
@@ -53,6 +56,29 @@ public class HillaPlugin : Plugin<Project> {
 
             project.tasks.named("vaadinBuildFrontend") {
                 it.dependsOn("hillaConfigure")
+            }
+        }
+
+        // Configure Kotlin-specific tasks only if Kotlin JVM plugin is applied
+        project.plugins.withId("org.jetbrains.kotlin.jvm") {
+            project.tasks.named("compileKotlin").configure { task ->
+                val compilerOptions = task.javaClass.methods.find { it.name == "getCompilerOptions" }?.invoke(task)
+                if (compilerOptions != null) {
+                    val freeCompilerArgs = compilerOptions.javaClass.methods.find { it.name == "getFreeCompilerArgs" }
+                        ?.invoke(compilerOptions) as? DefaultListProperty<String>
+                    freeCompilerArgs?.addAll(listOf(JSR_305_STRICT, EMIT_JVM_TYPE_ANNOTATIONS)) ?:
+                    project.logger.warn("""
+                        Kotlin JVM plugin is applied and 'compilerOption' was not null, but could not acquire the
+                        'freeCompilerArgs' instance from the 'compilerOption' to configure Kotlin compiler options by
+                         adding '$JSR_305_STRICT' and '$EMIT_JVM_TYPE_ANNOTATIONS'. To make sure annotation based form
+                         validations are enabled, add the above compiler args in the build file explicitly.""".trimIndent())
+                } else {
+                    project.logger.warn("""
+                        Kotlin JVM plugin is applied, but could not acquire the 'compilerOption' instance from the
+                        'compileKotlin' task instance to configure Kotlin compiler options by adding '$JSR_305_STRICT'
+                         and '$EMIT_JVM_TYPE_ANNOTATIONS' to the 'freeCompilerArgs'. To make sure annotation based form
+                         validations are enabled, add the above compiler args in the build file explicitly.""".trimIndent())
+                }
             }
         }
 

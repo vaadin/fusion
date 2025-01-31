@@ -8,7 +8,7 @@ plugins {
     id 'maven-publish'
     id 'idea'
     id 'com.gradle.plugin-publish' version '0.11.0'
-    id 'org.jetbrains.kotlin.jvm' version '1.9.20-Beta2'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.25'
     id 'org.jetbrains.dokka' version '1.9.0'
 }
 
@@ -66,14 +66,14 @@ repositories {
 }
 
 dependencies {
-    implementation('org.jetbrains.kotlin:kotlin-stdlib:1.9.20')
+    implementation('org.jetbrains.kotlin:kotlin-stdlib:1.9.25')
     implementation("com.vaadin:hilla-endpoint:$version")
     implementation("com.vaadin:hilla-engine-core:$version")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
     implementation("org.springframework.boot:spring-boot-loader-tools:$springBootVersion")
 
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.20")
+    testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.25")
 }
 
 idea {
