@@ -8,7 +8,7 @@ import {
 } from '@vaadin/hilla-frontend';
 import { createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
 
-type LoginFunction = (username: string, password: string) => Promise<LoginResult>;
+type LoginFunction = (username: string, password: string, options?: LoginOptions) => Promise<LoginResult>;
 type LogoutFunction = () => Promise<void>;
 
 const LOGIN_FETCH = 'LOGIN_FETCH';
