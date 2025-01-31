@@ -24,6 +24,8 @@ $wnd.Vaadin.registrations.push({
   is: 'endpoint',
 });
 
+export const bodyPartName = 'hilla_body_part';
+
 export type MaybePromise<T> = Promise<T> | T;
 
 /**
@@ -188,6 +190,40 @@ function isFlowLoaded(): boolean {
 }
 
 /**
+ * Extracts file objects from the object that is used to build the request body.
+ *
+ * @param obj - The object to extract files from.
+ * @returns A tuple with the object without files and a map of files.
+ */
+function extractFiles(obj: Record<string, unknown>): [Record<string, unknown>, Map<string, File>] {
+  const fileMap = new Map<string, File>();
+
+  function recursiveExtract(prop: unknown, path: string): unknown {
+    if (prop !== null && typeof prop === 'object') {
+      if (prop instanceof File) {
+        fileMap.set(path, prop);
+        return null;
+      }
+      if (Array.isArray(prop)) {
+        return prop.map((item, index) => recursiveExtract(item, `${path}/${index}`));
+      }
+      return Object.entries(prop).reduce<Record<string, unknown>>((acc, [key, value]) => {
+        const newPath = `${path}/${key}`;
+        if (value instanceof File) {
+          fileMap.set(newPath, value);
+        } else {
+          acc[key] = recursiveExtract(value, newPath);
+        }
+        return acc;
+      }, {});
+    }
+    return prop;
+  }
+
+  return [recursiveExtract(obj, '') as Record<string, unknown>, fileMap];
+}
+
+/**
  * A list of parameters supported by {@link ConnectClient.call | the call() method in ConnectClient}.
  */
 export interface EndpointRequestInit {
@@ -304,13 +340,31 @@ export class ConnectClient {
     const csrfHeaders = globalThis.document ? getCsrfTokenHeadersForEndpointRequest(globalThis.document) : {};
     const headers: Record<string, string> = {
       Accept: 'application/json',
-      'Content-Type': 'application/json',
       ...csrfHeaders,
     };
 
+    const [paramsWithoutFiles, files] = extractFiles(params ?? {});
+    let body;
+
+    if (files.size > 0) {
+      // in this case params is not undefined, otherwise there would be no files
+      body = new FormData();
+      body.append(
+        bodyPartName,
+        JSON.stringify(paramsWithoutFiles, (_, value) => (value === undefined ? null : value)),
+      );
+
+      for (const [path, file] of files) {
+        body.append(path, file);
+      }
+    } else {
+      headers['Content-Type'] = 'application/json';
+      body =
+        params !== undefined ? JSON.stringify(params, (_, value) => (value === undefined ? null : value)) : undefined;
+    }
+
     const request = new Request(`${this.prefix}/${endpoint}/${method}`, {
-      body:
-        params !== undefined ? JSON.stringify(params, (_, value) => (value === undefined ? null : value)) : undefined,
+      body, // automatically sets Content-Type header
       headers,
       method: 'POST',
     });

@@ -17,6 +17,7 @@ import {
   ForbiddenResponseError,
   type MiddlewareFunction,
   UnauthorizedResponseError,
+  bodyPartName,
 } from '../src/index.js';
 import type { Vaadin } from '../src/types.js';
 import { subscribeStub } from './mocks/atmosphere.js';
@@ -490,6 +491,60 @@ describe('@vaadin/hilla-frontend', () => {
         const { request } = fetchMock.callHistory.lastCall() ?? {};
         expect(request).to.exist;
         expect(await request?.json()).to.deep.equal({ fooParam: 'foo' });
+      });
+
+      it('should use multipart if a param is of File type', async () => {
+        const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
+        await client.call('FooEndpoint', 'fooMethod', { fooParam: file });
+
+        const request = fetchMock.callHistory.lastCall()?.request;
+        expect(request).to.exist;
+        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
+        const formData = await request!.formData();
+
+        const uploadedFile = formData.get('/fooParam') as File | null;
+        expect(uploadedFile).to.be.instanceOf(File);
+        expect(uploadedFile!.name).to.equal('foo.txt');
+        expect(await uploadedFile!.text()).to.equal('foo');
+
+        const body = formData.get(bodyPartName);
+        expect(body).to.equal('{}');
+      });
+
+      it('should use multipart if a param has a property if File type', async () => {
+        const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
+        await client.call('FooEndpoint', 'fooMethod', { fooParam: { a: 'abc', b: file } });
+
+        const request = fetchMock.callHistory.lastCall()?.request;
+        expect(request).to.exist;
+        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
+        const formData = await request!.formData();
+
+        const uploadedFile = formData.get('/fooParam/b') as File | null;
+        expect(uploadedFile).to.be.instanceOf(File);
+        expect(uploadedFile!.name).to.equal('foo.txt');
+        expect(await uploadedFile!.text()).to.equal('foo');
+
+        const body = formData.get(bodyPartName);
+        expect(body).to.equal('{"fooParam":{"a":"abc"}}');
+      });
+
+      it('should use multipart if a File is found in array', async () => {
+        const file = new File(['foo'], 'foo.txt', { type: 'text/plain' });
+        await client.call('FooEndpoint', 'fooMethod', { fooParam: ['a', file, 'c'], other: 'abc' });
+
+        const request = fetchMock.callHistory.lastCall()?.request;
+        expect(request).to.exist;
+        expect(request?.headers.get('content-type')).to.match(/^multipart\/form-data;/u);
+        const formData = await request!.formData();
+
+        const uploadedFile = formData.get('/fooParam/1') as File | null;
+        expect(uploadedFile).to.be.instanceOf(File);
+        expect(uploadedFile!.name).to.equal('foo.txt');
+        expect(await uploadedFile!.text()).to.equal('foo');
+
+        const body = formData.get(bodyPartName);
+        expect(body).to.equal('{"fooParam":["a",null,"c"],"other":"abc"}');
       });
 
       describe('middleware invocation', () => {
