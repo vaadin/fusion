@@ -1,6 +1,8 @@
 package com.vaadin.hilla.parser.plugins.backbone;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.jspecify.annotations.NonNull;
 
@@ -81,7 +83,13 @@ public final class MethodPlugin
             var endpointCls = (ClassInfoModel) node.getSource();
             var methodNodes = endpointCls.getMethods().stream()
                     .filter(MethodInfoModel::isPublic)
-                    .<Node<?, ?>> map(MethodNode::of);
+                    .collect(Collectors.toMap(MethodInfoModel::getName,
+                            Function.identity(), (m1, m2) -> {
+                                throw new BackbonePluginException(String.format(
+                                        "Overloaded methods are not supported (method '%s' in class '%s')",
+                                        m1.getName(), endpointCls.getName()));
+                            }))
+                    .values().stream().<Node<?, ?>> map(MethodNode::of);
             return nodeDependencies.appendChildNodes(methodNodes);
         }
 
