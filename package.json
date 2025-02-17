@@ -79,7 +79,6 @@
     "glob": "11.0.1",
     "lint-staged": "15.4.3",
     "magic-string": "0.30.17",
-    "meow": "13.2.0",
     "micromatch": "4.0.8",
     "nx": "20.4.0",
     "pino": "9.6.0",

@@ -47,8 +47,6 @@
   },
   "dependencies": {
     "@vaadin/hilla-generator-core": "24.7.0-alpha13",
-    "@vaadin/hilla-generator-utils": "24.7.0-alpha13",
-    "get-stdin": "9.0.0",
-    "meow": "13.2.0"
+    "@vaadin/hilla-generator-utils": "24.7.0-alpha13"
   }
 }

@@ -1,59 +1,80 @@
+import { readFile } from 'node:fs/promises';
+import { pathToFileURL } from 'node:url';
+import { parseArgs } from 'node:util';
 import Generator from '@vaadin/hilla-generator-core/Generator.js';
 import LoggerFactory from '@vaadin/hilla-generator-utils/LoggerFactory.js';
-import meow from 'meow';
+import type { PackageJson } from 'type-fest';
 import GeneratorIO from './GeneratorIO.js';
-import { processInput } from './utils.js';
 
 const {
-  flags: { outputDir, plugin: plugins, verbose },
-  input: [input],
-} = meow(
-  `
-Usage:
-  tsgen
-    (will read JSON from stdin)
-  tsgen <OpenAPI JSON string>
-  tsgen <OpenAPI file path>
+  values: { inputFile, help, outputDir, plugin: plugins, verbose, version },
+} = parseArgs({
+  options: {
+    inputFile: {
+      type: 'string',
+      short: 'i',
+    },
+    help: {
+      type: 'boolean',
+    },
+    outputDir: {
+      default: 'frontend/generated',
+      short: 'o',
+      type: 'string',
+    },
+    plugin: {
+      default: [],
+      multiple: true,
+      short: 'p',
+      type: 'string',
+    },
+    verbose: {
+      short: 'v',
+      type: 'boolean',
+    },
+    version: {
+      type: 'boolean',
+    },
+  },
+});
+
+if (help) {
+  // eslint-disable-next-line no-console
+  console.log(`Usage:
+tsgen
 
 Options:
+  -i, --input-file       OpenAPI schema file (required)
   -h, --help             Show this screen
   -o, --output-dir       Output directory
   -p, --plugin <path>    Use the plugin loadable by <path>.
+  -v, --verbose          Enable verbose logging
   --version              Show the app version
-`,
-  {
-    flags: {
-      outputDir: {
-        default: 'frontend/generated',
-        shortFlag: 'o',
-        type: 'string',
-      },
-      plugin: {
-        default: [],
-        isMultiple: true,
-        shortFlag: 'p',
-        type: 'string',
-      },
-      verbose: {
-        shortFlag: 'v',
-        type: 'boolean',
-      },
-    },
-    importMeta: import.meta,
-  },
-);
+`);
+} else if (version) {
+  const packageJson: PackageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
+  // eslint-disable-next-line no-console
+  console.log(packageJson.version);
+} else {
+  if (!inputFile) {
+    throw new Error('Input file is required');
+  }
 
-const logger = new LoggerFactory({ verbose });
+  const logger = new LoggerFactory({ verbose });
 
-const io = new GeneratorIO(outputDir, logger);
+  const io = new GeneratorIO(
+    new URL(outputDir.endsWith('/') ? outputDir : `${outputDir}/`, pathToFileURL(`${process.cwd()}/`)),
+    logger,
+  );
 
-const resolvedPlugins = await Promise.all(
-  Array.from(new Set(plugins), async (pluginPath) => io.loadPlugin(pluginPath)),
-);
-const generator = new Generator(resolvedPlugins, { logger, outputDir });
+  const resolvedPlugins = await Promise.all(
+    Array.from(new Set(plugins), async (pluginPath) => io.loadPlugin(pluginPath)),
+  );
+  const generator = new Generator(resolvedPlugins, { logger, outputDir });
 
-const files = await generator.process(await processInput(io, input));
-const filesToDelete = await io.getGeneratedFiles();
-const generatedFiles = await io.writeGeneratedFiles(files);
+  const files = await generator.process(await readFile(inputFile, 'utf8'));
+  const filesToDelete = await io.getExistingGeneratedFiles();
+  const generatedFiles = await io.writeGeneratedFiles(files);
 
-await io.cleanOutputDir(generatedFiles, filesToDelete);
+  await io.cleanOutputDir(generatedFiles, filesToDelete);
+}

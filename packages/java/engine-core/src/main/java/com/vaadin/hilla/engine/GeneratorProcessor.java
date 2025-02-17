@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import com.vaadin.hilla.parser.core.OpenAPIFileType;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -45,8 +46,9 @@ public final class GeneratorProcessor {
             return;
         }
 
-        var arguments = new ArrayList<Object>();
+        var arguments = new ArrayList<>();
         arguments.add(TSGEN_PATH);
+        prepareOpenAPI(arguments);
         prepareOutputDir(arguments);
         preparePlugins(arguments);
         prepareVerbose(arguments);
@@ -55,13 +57,7 @@ public final class GeneratorProcessor {
             var runner = new GeneratorShellRunner(baseDir.toFile(), nodeCommand,
                     arguments.stream().map(Objects::toString)
                             .toArray(String[]::new));
-            runner.run((stdIn) -> {
-                try {
-                    Files.copy(openAPIFile, stdIn);
-                } catch (IOException e) {
-                    throw new LambdaException(e);
-                }
-            });
+            runner.run(null);
         } catch (LambdaException e) {
             throw new GeneratorException("Node execution failed", e.getCause());
         } catch (CommandNotFoundException e) {
@@ -137,6 +133,12 @@ public final class GeneratorProcessor {
 
     private void applyPlugins(GeneratorConfiguration.@NonNull Plugins plugins) {
         pluginsProcessor.setConfig(plugins);
+    }
+
+    private void prepareOpenAPI(ArrayList<Object> arguments) {
+        logger.debug("Using OpenAPI file: {}", openAPIFile);
+        arguments.add("-i");
+        arguments.add(openAPIFile);
     }
 
     private void prepareOutputDir(List<Object> arguments) {
