@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { spawn, type SpawnOptions } from 'node:child_process';
-import { copyFile, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { PackageJson } from 'type-fest';
 import { componentOptions, destination, local, remote, type Versions } from './config.js';
 import generate from './generate.js';

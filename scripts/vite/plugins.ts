@@ -1,37 +1,24 @@
 import { readFile } from 'node:fs/promises';
-import cssnanoPlugin from 'cssnano';
-import MagicString from 'magic-string';
-import postcss from 'postcss';
+import { pathToFileURL } from 'node:url';
+import type { PackageJson } from 'type-fest';
 import type { Plugin } from 'vite';
+import { compileCSS } from '../utils/compileCSS.js';
+import injectRegister from '../utils/injectRegister.js';
 
 export type PluginOptions = Readonly<{
-  root: URL;
+  packageJson: PackageJson;
 }>;
 
 export type LoadRegisterOptions = PluginOptions;
 
 // This plugin adds "__REGISTER__()" function definition everywhere where it finds
 // the call for that function. It is necessary for a correct code for tests.
-export function loadRegisterJs({ root }: LoadRegisterOptions): Plugin {
+export function loadRegisterJs({ packageJson }: LoadRegisterOptions): Plugin {
   return {
     enforce: 'pre',
     name: 'vite-hilla-register',
-    async transform(code) {
-      if (/__REGISTER__\(.*\)/u.test(code) && !code.includes('function __REGISTER__')) {
-        const registerCode = await readFile(new URL('scripts/register.js', root), 'utf8').then((c) =>
-          c.replace('export', ''),
-        );
-
-        const _code = new MagicString(code);
-        _code.prepend(registerCode);
-
-        return {
-          code: _code.toString(),
-          map: _code.generateMap(),
-        };
-      }
-
-      return null;
+    transform(code) {
+      return injectRegister(code, packageJson);
     },
   };
 }
@@ -39,7 +26,6 @@ export function loadRegisterJs({ root }: LoadRegisterOptions): Plugin {
 // This plugin transforms CSS to Constructible CSSStyleSheet for easy
 // installation it to the document styles.
 export function constructCss(): Plugin {
-  const cssTransformer = postcss([cssnanoPlugin()]);
   const css = new Map();
 
   return {
@@ -58,10 +44,8 @@ export function constructCss(): Plugin {
     },
     async transform(_, id) {
       if (id.endsWith('.obj.css')) {
-        const { content } = await cssTransformer.process(css.get(id), { from: id });
-
         return {
-          code: `const css = new CSSStyleSheet();css.replaceSync(${JSON.stringify(content)});export default css;`,
+          code: await compileCSS(css.get(id), pathToFileURL(id)),
         };
       }
 

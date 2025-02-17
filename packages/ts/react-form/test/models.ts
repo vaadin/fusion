@@ -21,7 +21,7 @@ export interface User extends FormUser {
 }
 
 export class FormUserModel<T extends FormUser = FormUser> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(FormUserModel);
+  static override createEmptyValue: () => FormUser = makeObjectEmptyValueCreator(FormUserModel);
 
   get name(): StringModel {
     return this[_getPropertyModel](
@@ -47,7 +47,7 @@ export class FormUserModel<T extends FormUser = FormUser> extends ObjectModel<T>
 }
 
 export class UserModel<T extends User = User> extends FormUserModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(UserModel);
+  static override createEmptyValue: () => User = makeObjectEmptyValueCreator(UserModel);
 
   get id(): NumberModel {
     return this[_getPropertyModel]('id', (parent, key) => new NumberModel(parent, key, false));
@@ -60,7 +60,7 @@ export interface Login {
 }
 
 export class LoginModel<T extends Login = Login> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(LoginModel);
+  static override createEmptyValue: () => Login = makeObjectEmptyValueCreator(LoginModel);
 
   get user(): FormUserModel {
     return this[_getPropertyModel]('user', (parent, key) => new FormUserModel(parent, key, false));
@@ -77,7 +77,7 @@ export interface Entity {
 }
 
 export class EntityModel<T extends Entity> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(EntityModel);
+  static override createEmptyValue: () => Entity = makeObjectEmptyValueCreator(EntityModel);
 
   get projectId(): NumberModel {
     return this[_getPropertyModel](
@@ -119,7 +119,7 @@ export interface Team {
 }
 
 export class PlayerModel<T extends Player = Player> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(PlayerModel);
+  static override createEmptyValue: () => Player = makeObjectEmptyValueCreator(PlayerModel);
 
   get id(): NumberModel {
     return this[_getPropertyModel](
@@ -151,7 +151,7 @@ export class PlayerModel<T extends Player = Player> extends ObjectModel<T> {
 }
 
 export class TeamModel<T extends Team = Team> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(TeamModel);
+  static override createEmptyValue: () => Team = makeObjectEmptyValueCreator(TeamModel);
 
   get id(): NumberModel {
     return this[_getPropertyModel](
@@ -186,7 +186,7 @@ export interface PostalAddress {
   streetAddress?: StreetAddress;
 }
 export class StreetAddressModel<T extends StreetAddress = StreetAddress> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(StreetAddressModel);
+  static override createEmptyValue: () => StreetAddress = makeObjectEmptyValueCreator(StreetAddressModel);
 
   get number(): StringModel {
     return this[_getPropertyModel](
@@ -203,7 +203,7 @@ export class StreetAddressModel<T extends StreetAddress = StreetAddress> extends
   }
 }
 export class PostalAddressModel<T extends PostalAddress = PostalAddress> extends ObjectModel<T> {
-  static override createEmptyValue = makeObjectEmptyValueCreator(PostalAddressModel);
+  static override createEmptyValue: () => PostalAddress = makeObjectEmptyValueCreator(PostalAddressModel);
   get streetAddress(): StreetAddressModel {
     return this[_getPropertyModel]('streetAddress', (parent, key) => new StreetAddressModel(parent, key, true));
   }

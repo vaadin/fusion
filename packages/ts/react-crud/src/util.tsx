@@ -1,5 +1,5 @@
 import React, { type CSSProperties, forwardRef } from 'react';
-import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
+import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 
 export type ComponentStyleProps = Readonly<{
   id?: string;

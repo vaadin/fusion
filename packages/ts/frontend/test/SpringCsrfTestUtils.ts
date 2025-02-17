@@ -8,8 +8,8 @@ export const TEST_VAADIN_CSRF_TOKEN_VALUE = 'vaadin-csrf-token';
 const TEST_SPRING_CSRF_META_TAG_NAME = '_csrf';
 
 export function setupSpringCsrfMetaTags(
-  csrfToken = TEST_SPRING_CSRF_TOKEN_VALUE,
-  csrfMetaTagName = TEST_SPRING_CSRF_META_TAG_NAME,
+  csrfToken: string = TEST_SPRING_CSRF_TOKEN_VALUE,
+  csrfMetaTagName: string = TEST_SPRING_CSRF_META_TAG_NAME,
 ): void {
   let csrfMetaTag = document.head.querySelector<HTMLMetaElement>('meta[name="_csrf"]');
   let csrfHeaderNameMetaTag = document.head.querySelector<HTMLMetaElement>('meta[name="_csrf_header"]');

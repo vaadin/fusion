@@ -212,7 +212,7 @@ export function createTestingRouteMeta(dir: URL): readonly RouteMeta[] {
   ];
 }
 
-export const components = {
+export const components: Record<string, RouteModule> = {
   about: {
     // eslint-disable-next-line func-name-matching
     default: function About(): JSX.Element {
@@ -276,7 +276,7 @@ export const components = {
     },
     config: { title: 'Index' },
   },
-} satisfies Record<string, RouteModule>;
+};
 
 export function createLogger(): Logger {
   return {

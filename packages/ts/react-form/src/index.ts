@@ -251,7 +251,7 @@ export function useForm<M extends AbstractModel>(
   }, [binder]);
 
   return {
-    ...getFormPart(binder),
+    ...getFormPart<M>(binder),
     clear,
     field,
     read: binder.read.bind(binder),

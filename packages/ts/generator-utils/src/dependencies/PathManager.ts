@@ -39,7 +39,11 @@ export default class PathManager {
     return path;
   }
 
-  createRelativePath(path: URL | string, fileExtension?: string, relativeTo = this.#options.relativeTo): string {
+  createRelativePath(
+    path: URL | string,
+    fileExtension?: string,
+    relativeTo: string | URL = this.#options.relativeTo,
+  ): string {
     const { extension } = this.#options;
     const _path = path instanceof URL ? fileURLToPath(path) : path;
     let result = _path;
@@ -55,7 +59,7 @@ export default class PathManager {
     return result.startsWith('.') ? result : `./${result}`;
   }
 
-  createTSAliasModulePath(path: string, root = this.#options.aliasRoot): string {
+  createTSAliasModulePath(path: string, root: string | undefined = this.#options.aliasRoot): string {
     return root ? `${root}/${path}` : path;
   }
 }

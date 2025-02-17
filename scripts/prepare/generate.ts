@@ -51,7 +51,7 @@ const [writer, transformer] = await loadScripts();
 
 const [
   hillaJsonTemplateFileName,
-  hillaReactJsonTemplateFileName,
+  ,
   releaseNotesTemplateFileName,
   releaseNotesMaintenanceTemplateFileName,
   releaseNotesPrereleaseTemplateFileName,
@@ -68,12 +68,9 @@ const [
   releaseNotesResultFileName,
   releaseNotesMaintenanceResultFileName,
   releaseNotesPrereleaseResultFileName,
-] = [
-  'hilla-versions.json',
-  'release-note.md',
-  'release-note-maintenance.md',
-  'release-note-prerelease.md',
-].map((name) => fileURLToPath(new URL(`results/${name}`, import.meta.url)));
+] = ['hilla-versions.json', 'release-note.md', 'release-note-maintenance.md', 'release-note-prerelease.md'].map(
+  (name) => fileURLToPath(new URL(`results/${name}`, import.meta.url)),
+);
 
 export default function generate(version: string, versions: Versions): void {
   console.log('Generating release files');

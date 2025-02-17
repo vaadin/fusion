@@ -1,5 +1,5 @@
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
+import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable.js';
 
 export interface FormService<T> {
   save(value: T): Promise<T | undefined>;

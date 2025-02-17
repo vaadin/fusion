@@ -18,7 +18,7 @@ import { ColumnContext, CustomColumnContext, type SortState } from './autogrid-c
 import { type ColumnOptions, getColumnOptions } from './autogrid-columns.js';
 import { AutoGridFooterItemCountRenderer, AutoGridRowNumberRenderer, FooterContext } from './autogrid-renderers.js';
 import css from './autogrid.obj.css';
-import type { ListService } from './crud';
+import type { ListService } from './crud.js';
 import { createDataProvider, type DataProvider, isCountService, type ItemCounts } from './data-provider.js';
 import { type HeaderFilterRendererProps, NoHeaderFilter, HeaderFilterWrapper } from './header-filter';
 import { HeaderSorter } from './header-sorter';

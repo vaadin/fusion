@@ -30,7 +30,9 @@ export function getSubscriptionEventSpies(): SubscriptionEventSpies | undefined 
   return subscriptionEventSpies;
 }
 
-export const subscribeStub = sinon
+export type AtmosphereSubscribe = Required<Atmosphere.Atmosphere>['subscribe'];
+
+export const subscribeStub: sinon.SinonStub<Parameters<AtmosphereSubscribe>, ReturnType<AtmosphereSubscribe>> = sinon
   .stub(atmosphere as Required<Atmosphere.Atmosphere>, 'subscribe')
   .callsFake((request: Atmosphere.Request) => {
     // We already have the call registered when we come here for the first time.

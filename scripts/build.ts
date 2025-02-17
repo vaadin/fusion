@@ -1,66 +1,90 @@
-import { readFile } from 'node:fs/promises';
-import { sep } from 'node:path';
+import { mkdir, readFile, writeFile, glob } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import cssnanoPlugin from 'cssnano';
-import { build, type Plugin } from 'esbuild';
-import { glob } from 'glob';
-import postcss from 'postcss';
 import type { PackageJson } from 'type-fest';
+import { createCompilerHost, createProgram, type ParsedCommandLine, sys } from 'typescript';
+import { compileCSS, replaceCSSImports } from './utils/compileCSS.js';
+import dir from './utils/dir.js';
+import injectRegister from './utils/injectRegister.js';
+import loadTSConfig from './utils/loadTSConfig.js';
+import redirectURLPart from './utils/redirectURLPart.js';
 
-const scriptsDir = new URL('./', import.meta.url);
-const packageRoot = pathToFileURL(process.cwd() + sep);
-const [packageJsonFile, srcFiles] = await Promise.all([
-  readFile(new URL('package.json', packageRoot), 'utf8'),
-  glob('src/**/*.{ts,tsx,obj.css}', { ignore: ['**/*.d.ts', '**/*.t.ts'] }),
+const cwd = pathToFileURL(dir(process.cwd()));
+const sourceDir = new URL('src/', cwd);
+
+const [config, packageJson] = await Promise.all([
+  loadTSConfig(new URL('tsconfig.build.json', cwd)),
+  readFile(new URL('package.json', cwd), 'utf8').then((contents) => JSON.parse(contents) as PackageJson),
 ]);
 
-const packageJson: PackageJson = JSON.parse(packageJsonFile);
+const outDir = new URL(dir(config.options.outDir ?? 'dist'), cwd);
 
-const cssTransformer = postcss([cssnanoPlugin()]);
-const cssPath = /['"](.+)\.obj\.css['"]/gmu;
-const cssConstructPlugin: Plugin = {
-  name: 'construct-css',
-  setup(_build) {
-    // Here CSS imports like `import css from 'autocrud.obj.css';` are transformed to
-    // JS imports: `import css from 'autocrud.obj.js'`.
-    _build.onLoad({ filter: /\.tsx?/u }, async ({ path }) => {
-      const contents = await readFile(path, 'utf8');
+async function* loadFiles() {
+  for await (const file of glob('**/*.{ts,tsx,obj.css}', { cwd: fileURLToPath(sourceDir) })) {
+    const fileURL = new URL(file, sourceDir);
 
-      return {
-        contents: contents.replaceAll(cssPath, "'$1.obj.js'"),
-        loader: 'tsx',
-      };
-    });
+    if (file.endsWith('.d.ts')) {
+      throw new Error(`Declaration files are not allowed in source directory: ${fileURL.toString()}`);
+    }
 
-    // We transform CSS into a Constructible CSSStyleSheet to add it to the document on import.
-    _build.onLoad({ filter: /\.obj\.css/u }, async ({ path }) => {
-      const contents = await readFile(path, 'utf8');
-      const processed = await cssTransformer
-        .process(contents)
-        .then(({ content: c }) => c.replaceAll(/[`$]/gmu, '\\$&'));
+    const contents = await readFile(fileURL, 'utf8');
 
-      return {
-        contents: `const css = new CSSStyleSheet();css.replaceSync(\`${processed}\`);export { css as default };`,
-        loader: 'js',
-      };
-    });
-  },
-};
+    if (file.endsWith('.ts') || file.endsWith('.tsx')) {
+      let result = injectRegister(contents, packageJson);
+      result = replaceCSSImports(result);
+      yield [fileURLToPath(fileURL), result] as const;
+    } else if (file.endsWith('.obj.css')) {
+      yield [fileURLToPath(fileURL), contents] as const;
+    } else {
+      throw new Error(`Unexpected file type: ${fileURL.toString()}`);
+    }
+  }
+}
 
-await build({
-  define: {
-    __NAME__: `'${packageJson.name ?? '@hilla/unknown'}'`,
-    __VERSION__: `'${packageJson.version ?? '0.0.0'}'`,
-  },
-  // Adds a __REGISTER__ function definition everywhere in the built code where
-  // the call for that function exists.
-  inject: [fileURLToPath(new URL('./register.js', scriptsDir))],
-  entryPoints: srcFiles.map((file) => new URL(file, packageRoot)).map((url) => fileURLToPath(url)),
-  format: 'esm',
-  outdir: fileURLToPath(packageRoot),
-  packages: 'external',
-  plugins: [cssConstructPlugin],
-  sourcemap: 'linked',
-  sourcesContent: true,
-  tsconfig: fileURLToPath(new URL('./tsconfig.build.json', packageRoot)),
-});
+const originalFiles = Object.fromEntries(await Array.fromAsync(loadFiles()));
+
+/**
+ * Compiles the TypeScript files applying the given transformers, and filters
+ * empty JS files.
+ *
+ * @param options - The compiler options.
+ * @param fileNames - The names of files to compile.
+ * @returns The array of names of the compiled files and their contents.
+ */
+function compileTypeScript({ options, fileNames }: ParsedCommandLine): ReadonlyArray<readonly [URL, string]> {
+  const createdFiles: Array<readonly [string, string]> = [];
+  const host = createCompilerHost(options);
+  host.readFile = (fileName) => originalFiles[fileURLToPath(new URL(fileName, cwd))] ?? sys.readFile(fileName);
+  host.writeFile = (fileName, data) => {
+    createdFiles.push([fileName, data]);
+  };
+  const program = createProgram(fileNames, options, host);
+
+  program.emit();
+
+  return createdFiles
+    .filter(
+      ([fileName, data]) => !(fileName.endsWith('.js') && data.startsWith('export {}') && data.split('\n').length < 3),
+    )
+    .filter(([fileName], _, arr) => {
+      if (!fileName.endsWith('.js.map')) {
+        return true;
+      }
+      const sourceName = fileName.replace('.map', '');
+      return arr.some(([f]) => f === sourceName);
+    })
+    .map(([fileName, data]) => [new URL(fileName, outDir), data] as const);
+}
+
+const cssFiles = await Promise.all(
+  Object.entries(originalFiles)
+    .filter(([file]) => file.endsWith('.obj.css'))
+    .map(([file, data]) => [pathToFileURL(file.replace('.css', '.js')), data] as const)
+    .map(async ([file, data]) => [redirectURLPart(file, sourceDir, outDir), await compileCSS(data, file)] as const),
+);
+
+await Promise.all(
+  [...compileTypeScript(config), ...cssFiles].map(async ([file, data]) => {
+    await mkdir(new URL('./', file), { recursive: true });
+    await writeFile(file, data, 'utf8');
+  }),
+);

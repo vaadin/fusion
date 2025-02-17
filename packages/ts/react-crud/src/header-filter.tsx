@@ -19,9 +19,9 @@ import {
 } from 'react';
 import { ColumnContext, CustomColumnContext } from './autogrid-column-context.js';
 import { useDatePickerI18n } from './locale.js';
-import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
-import type PropertyStringFilter from './types/com/vaadin/hilla/crud/filter/PropertyStringFilter';
+import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
 import Matcher from './types/com/vaadin/hilla/crud/filter/PropertyStringFilter/Matcher.js';
+import type PropertyStringFilter from './types/com/vaadin/hilla/crud/filter/PropertyStringFilter.js';
 import { convertToTitleCase } from './util';
 
 type ExtractComponentTypeProps<T extends ComponentType<any>> = T extends ComponentType<infer U> ? U : never;

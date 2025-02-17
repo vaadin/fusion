@@ -9,13 +9,5 @@
     "build": {
       "dependsOn": ["^build"]
     }
-  },
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": ["build", "build:esbuild", "build:dts", "build:copy"]
-      }
-    }
   }
 }

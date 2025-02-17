@@ -16,9 +16,7 @@
   ],
   "scripts": {
     "clean:build": "git clean -fx . -e .vite -e node_modules",
-    "build": "concurrently npm:build:*",
-    "build:esbuild": "tsx ../../../scripts/build.ts",
-    "build:dts": "tsc --isolatedModules -p tsconfig.build.json",
+    "build": "tsx ../../../scripts/build.ts",
     "lint": "eslint src test",
     "lint:fix": "npm run lint -- --fix",
     "test": "vitest --run",

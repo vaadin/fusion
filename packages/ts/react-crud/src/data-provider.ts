@@ -1,9 +1,9 @@
 import type { GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
 import type { GridDataProvider } from '@vaadin/react-components/Grid';
 import { useMemo, useState } from 'react';
-import type { CountService, ListService } from './crud';
-import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
-import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort';
+import type { CountService, ListService } from './crud.js';
+import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
+import type Sort from './types/com/vaadin/hilla/mappedtypes/Sort.js';
 import Direction from './types/org/springframework/data/domain/Sort/Direction';
 import NullHandling from './types/org/springframework/data/domain/Sort/NullHandling';
 

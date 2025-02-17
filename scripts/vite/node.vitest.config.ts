@@ -19,16 +19,12 @@ export default defineConfig({
   },
   cacheDir: '.vite',
   esbuild: {
-    define: {
-      __NAME__: JSON.stringify(packageJson.name ?? '@hilla/unknown'),
-      __VERSION__: JSON.stringify(packageJson.version ?? '0.0.0'),
-    },
     supported: {
       decorators: false,
       'top-level-await': true,
     },
   },
-  plugins: [loadRegisterJs({ root })],
+  plugins: [loadRegisterJs({ packageJson })],
   test: {
     coverage: {
       enabled: false,

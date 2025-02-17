@@ -261,7 +261,7 @@ export class I18n {
  * The global I18n instance that is used to initialize translations, change the
  * current language, and translate strings.
  */
-export const i18n = new I18n();
+export const i18n: I18n = new I18n();
 
 /**
  * Returns a translated string for the given translation key. The key should

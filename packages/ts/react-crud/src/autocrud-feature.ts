@@ -1,6 +1,6 @@
 /* eslint-disable import/export */
 import { AutoCrud as _AutoCrud } from './autocrud.js';
-import { featureRegistration } from './util';
+import { featureRegistration } from './util.js';
 
 export * from './autocrud.js';
 

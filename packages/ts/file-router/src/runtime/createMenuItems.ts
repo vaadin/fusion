@@ -1,8 +1,10 @@
-import { signal } from '@vaadin/hilla-react-signals';
+import { type Signal, signal } from '@vaadin/hilla-react-signals';
 import type { VaadinWindow } from '../shared/internal.js';
-import type { MenuItem } from '../types.js';
+import type { MenuItem, ViewConfig } from '../types.js';
 
-export const viewsSignal = signal((window as VaadinWindow).Vaadin?.views);
+export const viewsSignal: Signal<Readonly<Record<string, Readonly<ViewConfig>>> | undefined> = signal(
+  (window as VaadinWindow).Vaadin?.views,
+);
 
 /**
  * Creates menu items from the views provided by the server. The views are sorted according to the

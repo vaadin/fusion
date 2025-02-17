@@ -1,7 +1,9 @@
 {
   "extends": "../../../tsconfig.json",
   "compilerOptions": {
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "lib": ["es2021", "dom"],
+    "isolatedDeclarations": true
   },
   "include": ["src", "test", "test.config.js"],
   "exclude": ["test/**/*.snap.ts"]

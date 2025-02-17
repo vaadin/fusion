@@ -6,7 +6,7 @@ import {
   type LogoutOptions,
   UnauthorizedResponseError,
 } from '@vaadin/hilla-frontend';
-import { createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
+import { type Context, createContext, type Dispatch, useContext, useEffect, useReducer } from 'react';
 
 type LoginFunction = (username: string, password: string, options?: LoginOptions) => Promise<LoginResult>;
 type LogoutFunction = () => Promise<void>;
@@ -151,7 +151,7 @@ export type Authentication<TUser> = Readonly<{
  * The hook that can be used to get the authentication state.
  * It returns the state of the authentication.
  */
-export const AuthContext = createContext<Authentication<unknown>>({
+export const AuthContext: Context<Authentication<unknown>> = createContext<Authentication<unknown>>({
   state: initialState,
   login() {
     throw new Error('AuthContext not initialized');

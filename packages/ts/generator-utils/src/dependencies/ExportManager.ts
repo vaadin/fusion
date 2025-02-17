@@ -137,7 +137,7 @@ export class DefaultExportManager implements CodeConvertable<ExportAssignment | 
 }
 
 export default class ExportManager implements CodeConvertable<readonly Statement[]> {
-  readonly default = new DefaultExportManager();
+  readonly default: DefaultExportManager = new DefaultExportManager();
   readonly named: NamedExportManager;
   readonly namespace: NamespaceExportManager;
 
