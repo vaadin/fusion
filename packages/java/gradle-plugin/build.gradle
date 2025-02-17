@@ -67,7 +67,6 @@ repositories {
 
 dependencies {
     implementation('org.jetbrains.kotlin:kotlin-stdlib:1.9.20')
-    implementation("com.vaadin:hilla-endpoint:$version")
     implementation("com.vaadin:hilla-engine-core:$version")
     implementation("com.vaadin:flow-gradle-plugin:$flowVersion")
     implementation("org.springframework.boot:spring-boot-loader-tools:$springBootVersion")
