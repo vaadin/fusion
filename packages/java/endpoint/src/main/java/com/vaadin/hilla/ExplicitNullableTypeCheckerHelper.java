@@ -38,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.vaadin.hilla.parser.utils.Generics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNullApi;
 
 import static com.vaadin.hilla.ExplicitNullableTypeChecker.isRequired;
 
@@ -49,20 +50,8 @@ class ExplicitNullableTypeCheckerHelper {
     // A map for tracking already visited Beans.
     private Map<Type, Set<Object>> visitedBeans;
 
-    private boolean requiredByContext;
-
     private static Logger getLogger() {
         return LoggerFactory.getLogger(EndpointController.class);
-    }
-
-    /**
-     * Creates a new helper.
-     *
-     * @param requiredByContext
-     *            {@code true} if the context defines that the node is required
-     */
-    public ExplicitNullableTypeCheckerHelper(boolean requiredByContext) {
-        this.requiredByContext = requiredByContext;
     }
 
     /**
@@ -208,10 +197,14 @@ class ExplicitNullableTypeCheckerHelper {
         }
         markAsVisited(value, expectedType);
         Class<?> clazz = (Class<?>) expectedType;
+        // the context is the package where the object is defined
+        boolean requiredByContext = clazz.getPackage() != null
+                && clazz.getPackage().isAnnotationPresent(NonNullApi.class);
         try {
             for (PropertyDescriptor propertyDescriptor : Introspector
                     .getBeanInfo(clazz).getPropertyDescriptors()) {
-                if (!isPropertySubjectForChecking(propertyDescriptor)) {
+                if (!isPropertySubjectForChecking(propertyDescriptor,
+                        requiredByContext)) {
                     continue;
                 }
 
@@ -239,7 +232,7 @@ class ExplicitNullableTypeCheckerHelper {
     }
 
     private boolean isPropertySubjectForChecking(
-            PropertyDescriptor propertyDescriptor) {
+            PropertyDescriptor propertyDescriptor, boolean requiredByContext) {
         try {
             String name = propertyDescriptor.getName();
             Method readMethod = propertyDescriptor.getReadMethod();

@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.vaadin.hilla.nonnullapi.NonNullableEntity;
 import org.jspecify.annotations.NonNull;
 
 import org.junit.Assert;
@@ -52,7 +53,7 @@ public class ExplicitNullableTypeCheckerTest {
     @Before
     public void setup() throws NoSuchMethodException {
         explicitNullableTypeChecker = new ExplicitNullableTypeChecker();
-        helper = new ExplicitNullableTypeCheckerHelper(false);
+        helper = new ExplicitNullableTypeCheckerHelper();
 
         stringListType = getClass()
                 .getMethod("parametrizedListMethod", String[].class)
@@ -68,42 +69,42 @@ public class ExplicitNullableTypeCheckerTest {
 
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForPrimitiveType() {
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(0,
-                byte.class, false));
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(0,
-                short.class, false));
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(0,
-                int.class, false));
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(0L,
-                long.class, false));
+        Assert.assertNull(
+                explicitNullableTypeChecker.checkValueForType(0, byte.class));
+        Assert.assertNull(
+                explicitNullableTypeChecker.checkValueForType(0, short.class));
+        Assert.assertNull(
+                explicitNullableTypeChecker.checkValueForType(0, int.class));
+        Assert.assertNull(
+                explicitNullableTypeChecker.checkValueForType(0L, long.class));
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(0.0f,
-                float.class, false));
+                float.class));
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(0.0d,
-                double.class, false));
+                double.class));
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(true,
-                boolean.class, false));
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType('a',
-                char.class, false));
+                boolean.class));
+        Assert.assertNull(
+                explicitNullableTypeChecker.checkValueForType('a', char.class));
     }
 
     @Test
     public void should_ReturnNull_When_GivenNullValue_ForVoidType() {
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(null,
-                void.class, false));
+                void.class));
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(null,
-                Void.class, false));
+                Void.class));
     }
 
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForStringType() {
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType("",
-                String.class, false));
+                String.class));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValue_ForStringType() {
         String error = explicitNullableTypeChecker.checkValueForType(null,
-                String.class, false);
+                String.class);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -113,13 +114,13 @@ public class ExplicitNullableTypeCheckerTest {
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForDateType() {
         Assert.assertNull(explicitNullableTypeChecker
-                .checkValueForType(new Date(), Date.class, false));
+                .checkValueForType(new Date(), Date.class));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValue_ForDateType() {
         String error = explicitNullableTypeChecker.checkValueForType(null,
-                Date.class, false);
+                Date.class);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -128,14 +129,14 @@ public class ExplicitNullableTypeCheckerTest {
 
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForDateTimeType() {
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(
-                LocalDateTime.now(), LocalDateTime.class, false));
+        Assert.assertNull(explicitNullableTypeChecker
+                .checkValueForType(LocalDateTime.now(), LocalDateTime.class));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValue_ForDateTimeType() {
         String error = explicitNullableTypeChecker.checkValueForType(null,
-                LocalDateTime.class, false);
+                LocalDateTime.class);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -145,13 +146,13 @@ public class ExplicitNullableTypeCheckerTest {
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForLocalTimeType() {
         Assert.assertNull(explicitNullableTypeChecker
-                .checkValueForType(LocalTime.now(), LocalTime.class, false));
+                .checkValueForType(LocalTime.now(), LocalTime.class));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValue_ForLcalTimeType() {
         String error = explicitNullableTypeChecker.checkValueForType(null,
-                LocalTime.class, false);
+                LocalTime.class);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -160,14 +161,14 @@ public class ExplicitNullableTypeCheckerTest {
 
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForMapType() {
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(
-                new HashMap<String, String>(), Map.class, false));
+        Assert.assertNull(explicitNullableTypeChecker
+                .checkValueForType(new HashMap<String, String>(), Map.class));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValue_ForMapType() {
         String error = explicitNullableTypeChecker.checkValueForType(null,
-                Map.class, false);
+                Map.class);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -177,13 +178,13 @@ public class ExplicitNullableTypeCheckerTest {
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForObjectType() {
         Assert.assertNull(explicitNullableTypeChecker
-                .checkValueForType(new Object(), Object.class, false));
+                .checkValueForType(new Object(), Object.class));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValue_ForObjectType() {
         String error = explicitNullableTypeChecker.checkValueForType(null,
-                Object.class, false);
+                Object.class);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -193,13 +194,13 @@ public class ExplicitNullableTypeCheckerTest {
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForOptionalType() {
         Assert.assertNull(explicitNullableTypeChecker
-                .checkValueForType(Optional.empty(), Optional.class, false));
+                .checkValueForType(Optional.empty(), Optional.class));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValue_ForOptionalType() {
         String error = explicitNullableTypeChecker.checkValueForType(null,
-                Optional.class, false);
+                Optional.class);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -208,14 +209,14 @@ public class ExplicitNullableTypeCheckerTest {
 
     @Test
     public void should_ReturnNull_When_GivenNonNullValue_ForCollectionType() {
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(
-                new ArrayList<String>(), stringListType, false));
+        Assert.assertNull(explicitNullableTypeChecker
+                .checkValueForType(new ArrayList<String>(), stringListType));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValue_ForCollectionType() {
         String error = explicitNullableTypeChecker.checkValueForType(null,
-                stringListType, false);
+                stringListType);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -257,14 +258,14 @@ public class ExplicitNullableTypeCheckerTest {
 
     @Test
     public void should_ReturnNull_When_GivenNonNullItems_InListType() {
-        Assert.assertNull(explicitNullableTypeChecker.checkValueForType(
-                Arrays.asList("", ""), stringListType, false));
+        Assert.assertNull(explicitNullableTypeChecker
+                .checkValueForType(Arrays.asList("", ""), stringListType));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullItem_InListType() {
-        String error = explicitNullableTypeChecker.checkValueForType(
-                Arrays.asList("", null, ""), stringListType, false);
+        String error = explicitNullableTypeChecker
+                .checkValueForType(Arrays.asList("", null, ""), stringListType);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -292,14 +293,13 @@ public class ExplicitNullableTypeCheckerTest {
     public void should_ReturnNull_When_GivenNonNullValues_InMapType() {
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(
                 parametrizedMapMethod(new Date(), new Date()),
-                stringToDateMapType, false));
+                stringToDateMapType));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullValues_InMapType() {
         String error = explicitNullableTypeChecker.checkValueForType(
-                parametrizedMapMethod(new Date(), null), stringToDateMapType,
-                false);
+                parametrizedMapMethod(new Date(), null), stringToDateMapType);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null value"));
@@ -328,7 +328,7 @@ public class ExplicitNullableTypeCheckerTest {
         bean.setTitle("foo");
 
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(bean,
-                Bean.class, false));
+                Bean.class));
     }
 
     @Test
@@ -337,7 +337,7 @@ public class ExplicitNullableTypeCheckerTest {
         Bean bean = new Bean();
 
         String error = explicitNullableTypeChecker.checkValueForType(bean,
-                Bean.class, false);
+                Bean.class);
 
         Assert.assertNotNull(error);
         Assert.assertTrue(error.contains("null"));
@@ -409,7 +409,7 @@ public class ExplicitNullableTypeCheckerTest {
         Assert.assertNull("Should allow values with @NonNull", error);
 
         verify(explicitNullableTypeChecker).checkValueForType(notNullValue,
-                String.class, false);
+                String.class);
     }
 
     @Test
@@ -419,7 +419,7 @@ public class ExplicitNullableTypeCheckerTest {
         person.setId(1);
 
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(person,
-                Person.class, false));
+                Person.class));
     }
 
     @Test
@@ -434,31 +434,39 @@ public class ExplicitNullableTypeCheckerTest {
         company.setEmployees(Arrays.asList(employee));
 
         Assert.assertNull(explicitNullableTypeChecker
-                .checkValueForType(employee, Employee.class, false));
+                .checkValueForType(employee, Employee.class));
 
         Assert.assertNull(explicitNullableTypeChecker.checkValueForType(company,
-                Company.class, false));
+                Company.class));
     }
 
     @Test
     public void should_ReturnNull_When_GivenNullAndNotRequiredByContext() {
         Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(null,
-                Employee.class, false));
+                Employee.class));
     }
 
     @Test
     public void should_ReturnError_When_GivenNullAndRequiredByContext() {
         Assert.assertNotNull(explicitNullableTypeChecker.checkValueForType(null,
-                Employee.class, true));
+                Employee.class));
     }
 
     @Test
-    public void should_ReturnError_When_GivenNestedNullAndRequiredByContext() {
+    public void should_NotReturnError_When_GivenNestedNullAndRequiredByTopContext() {
         Employee employee = new Employee();
         employee.setId(12);
         employee.setCompany(null);
+        Assert.assertNull(explicitNullableTypeChecker
+                .checkValueForType(employee, Employee.class));
+    }
+
+    @Test
+    public void should_ReturnError_When_GivenNestedNullAndRequiredByItsOwnContext() {
+        NonNullableEntity nonNullableEntity = new NonNullableEntity();
+        nonNullableEntity.setValue(null);
         Assert.assertNotNull(explicitNullableTypeChecker
-                .checkValueForType(employee, Employee.class, true));
+                .checkValueForType(nonNullableEntity, NonNullableEntity.class));
     }
 
     public List<String> parametrizedListMethod(String... args) {
