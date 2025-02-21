@@ -15,7 +15,10 @@
  */
 package com.vaadin.hilla.internal;
 
-import com.vaadin.hilla.engine.EngineConfiguration;
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,8 +29,13 @@ import com.vaadin.flow.server.frontend.FrontendUtils;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
-
+import com.vaadin.flow.server.frontend.scanner.ClassFinder;
+import com.vaadin.hilla.BrowserCallable;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointExposed;
+import com.vaadin.hilla.engine.EngineConfiguration;
 import com.vaadin.hilla.engine.ParserProcessor;
+import com.vaadin.hilla.signals.handler.SignalsHandler;
 
 /**
  * An implementation of the EndpointGeneratorTaskFactory, which creates endpoint
@@ -73,6 +81,26 @@ public class EndpointGeneratorTaskFactoryImpl
 
         var engineConfiguration = configureFromOptions(options);
         return new TaskGenerateOpenAPIImpl(engineConfiguration);
+    }
+
+    @Override
+    public Set<Class<? extends Annotation>> getBrowserCallableAnnotations() {
+        Set<Class<? extends Annotation>> classes = new HashSet<>();
+        classes.add(BrowserCallable.class);
+        classes.add(Endpoint.class);
+        classes.add(EndpointExposed.class);
+        return classes;
+    }
+
+    @Override
+    public boolean hasBrowserCallables(Options options) {
+        Set<Class<?>> foundClasses = new HashSet<>();
+        ClassFinder classFinder = options.getClassFinder();
+        getBrowserCallableAnnotations().forEach(annotation -> {
+            foundClasses.addAll(classFinder.getAnnotatedClasses(annotation));
+        });
+        foundClasses.remove(SignalsHandler.class);
+        return !foundClasses.isEmpty();
     }
 
     private static class SkipTaskGenerateEndpoint
