@@ -1,0 +1,11 @@
+Usage:
+tsgen
+
+Options:
+  -i, --input-file       OpenAPI schema file (required)
+  -h, --help             Show this screen
+  -o, --output-dir       Output directory
+  -p, --plugin <path>    Use the plugin loadable by <path>.
+  -v, --verbose          Enable verbose logging
+  --version              Show the app version
+
