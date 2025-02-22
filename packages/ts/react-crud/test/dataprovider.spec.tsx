@@ -1,6 +1,7 @@
 import { cleanup, renderHook } from '@testing-library/react';
 import type { ComboBoxDataProvider } from '@vaadin/react-components';
 import type { GridDataProvider, GridSorterDefinition } from '@vaadin/react-components/Grid.js';
+import type { DependencyList } from 'react';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import { afterEach, beforeEach, chai, describe, expect, it } from 'vitest';
@@ -13,6 +14,9 @@ import {
   useComboBoxDataProvider,
   useDataProvider,
   useGridDataProvider,
+  type GridFetchCallback,
+  type ComboBoxFetchMethod,
+  type GridFetchMethod,
   type ItemCounts,
 } from '../src/data-provider.js';
 import type AndFilter from '../src/types/com/vaadin/hilla/crud/filter/AndFilter.js';
@@ -287,6 +291,37 @@ describe('@hilla/react-crud', () => {
       await grid.requestPage(0);
       expect(called).to.be.equal(1);
     });
+    it('does not reassign data provider for an inline fetch function', () => {
+      const method1 = async (_pageable: Pageable) => await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable) => await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = { fetchCallback: GridFetchMethod<unknown> };
+
+      const hook = renderHook((props: PropsType) => useGridDataProvider(props.fetchCallback), {
+        initialProps: { fetchCallback: method1 },
+      });
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2 });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).to.be.eq(dataprovider2);
+    });
+    it('reassigns data provider if dependencies change', () => {
+      const method1 = async (_pageable: Pageable) => await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable) => await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = {
+        dependencies: DependencyList | undefined;
+        fetchCallback: GridFetchMethod<unknown>;
+      };
+
+      const hook = renderHook((props: PropsType) => useGridDataProvider(props.fetchCallback, props.dependencies), {
+        initialProps: { fetchCallback: method1, dependencies: ['first'] },
+      });
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2, dependencies: ['second'] });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).not.to.be.eq(dataprovider2);
+    });
   });
 
   describe('useComboBoxDataProvider', () => {
@@ -346,6 +381,44 @@ describe('@hilla/react-crud', () => {
       // Re-render without a reset should return the same instance, but after a refresh we should get a new instance
       expect(result1).to.equal(result2);
       expect(result2).not.to.equal(result3);
+    });
+    it('does not reassign data provider for an inline fetch function', () => {
+      const method1 = async (_pageable: Pageable, _filter: string) =>
+        await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable, _filter: string) =>
+        await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = { fetchCallback: ComboBoxFetchMethod<unknown> };
+
+      const hook = renderHook((props: PropsType) => useComboBoxDataProvider(props.fetchCallback), {
+        initialProps: { fetchCallback: method1 },
+      });
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2 });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).to.be.eq(dataprovider2);
+    });
+    it('reassigns data provider if dependencies change', () => {
+      const method1 = async (_pageable: Pageable, _filter: string) =>
+        await Promise.resolve([{ id: 1, name: 'Product 1' }]);
+      const method2 = async (_pageable: Pageable, _filter: string) =>
+        await Promise.resolve([{ id: 2, name: 'Product 2' }]);
+      type PropsType = {
+        dependencies: DependencyList | undefined;
+        fetchCallback: ComboBoxFetchMethod<unknown>;
+      };
+
+      const hook = renderHook(
+        (props: PropsType) => useComboBoxDataProvider(props.fetchCallback, {}, props.dependencies),
+        {
+          initialProps: { fetchCallback: method1, dependencies: ['first'] },
+        },
+      );
+
+      const dataprovider1 = hook.result.current;
+      hook.rerender({ fetchCallback: method2, dependencies: ['second'] });
+      const dataprovider2 = hook.result.current;
+      expect(dataprovider1).not.to.be.eq(dataprovider2);
     });
   });
 
