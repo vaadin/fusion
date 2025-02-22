@@ -1,9 +1,13 @@
 package com.vaadin.hilla.test.reactgrid;
 
+import java.util.Map;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.testbench.ButtonElement;
+import com.vaadin.testbench.TestBenchElement;
 
 public class GridUseGridDataProviderHookIT extends AbstractGridTest {
 
@@ -32,6 +36,33 @@ public class GridUseGridDataProviderHookIT extends AbstractGridTest {
         assertFirstName(1, "Yasmine");
         assertFirstName(2, "Xander");
         assertFirstName(3, "Xander");
+    }
+
+    @Test
+    public void filteringUsingSignalWorks() {
+        assertFirstName(0, "Alice");
+        assertFirstName(1, "Bob");
+        assertFirstName(2, "Charlie");
+        assertFirstName(3, "David");
+
+        setFilter("al");
+        assertFirstName(0, "Alice");
+        assertFirstName(1, "Edward"); // Gonazlez matches
+        assertFirstName(2, "Kathy"); // Walker matches
+        assertFirstName(3, "Laura"); // Hall matches
+        setFilter("");
+        assertFirstName(0, "Alice");
+        assertFirstName(1, "Bob");
+        assertFirstName(2, "Charlie");
+        assertFirstName(3, "David");
+
+    }
+
+    private void setFilter(String string) {
+        TestBenchElement filterInput = $("input").first();
+        filterInput.clear();
+        filterInput.sendKeys(string);
+        filterInput.dispatchEvent("input", Map.of("bubbles", true));
     }
 
     private void refresh() {

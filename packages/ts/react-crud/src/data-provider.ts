@@ -4,7 +4,7 @@ import type {
   ComboBoxDataProviderParams,
 } from '@vaadin/react-components';
 import type { GridDataProvider, GridDataProviderCallback, GridDataProviderParams } from '@vaadin/react-components/Grid';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type DependencyList } from 'react';
 import type { CountService, ListService } from './crud';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion';
 import type Pageable from './types/com/vaadin/hilla/mappedtypes/Pageable';
@@ -126,14 +126,14 @@ export abstract class DataProvider<TItem> {
 }
 
 export abstract class AbstractComboBoxDataProvider<TItem> {
-  protected readonly list: ComboBoxFetchCallback<TItem>;
+  protected readonly list: ComboBoxFetchMethod<TItem>;
   protected readonly loadTotalCount?: boolean;
 
   protected sort: Sort | undefined;
   protected totalCount: number | undefined;
   protected filteredCount: number | undefined;
 
-  constructor(list: ComboBoxFetchCallback<TItem>, sort: Sort | undefined) {
+  constructor(list: ComboBoxFetchMethod<TItem>, sort: Sort | undefined) {
     this.list = list;
     this.sort = sort;
   }
@@ -289,15 +289,25 @@ export type UseGridDataProviderResult<TItem> = GridDataProvider<TItem> & {
   refresh(): void;
 };
 
-export type GridFetchCallback<TItem> = (pageable: Pageable) => Promise<TItem[]>;
+export type GridFetchMethod<TItem> = (pageable: Pageable) => Promise<TItem[]>;
 
-export function useGridDataProvider<TItem>(list: GridFetchCallback<TItem>): UseGridDataProviderResult<TItem> {
+/**
+ * Creates a data provider for a grid component that fetches data using the provided fetch callback.
+ *
+ * @param fetch - the callback that fetches the data for the grid. The callback should return a promise that resolves to an array of items.
+ * @param dependencies - A list of all reactive values referenced inside of the fetch callback. A change to any of the listed values will cause the grid to refresh its data.
+ * @returns a data provider that can be assigned to a <Grid> component usings its dataProvider property and additionally contains a refresh method that can be called to force a reload of the grid data.
+ */
+export function useGridDataProvider<TItem>(
+  fetch: GridFetchMethod<TItem>,
+  dependencies?: DependencyList,
+): UseGridDataProviderResult<TItem> {
   const result = useDataProvider(
     useMemo(
       () => ({
-        list: async (pageable: Pageable) => list(pageable),
+        list: async (pageable: Pageable) => fetch(pageable),
       }),
-      [],
+      dependencies ?? [],
     ),
   );
   const dataProvider: UseGridDataProviderResult<TItem> = result.dataProvider as UseGridDataProviderResult<TItem>;
@@ -309,10 +319,10 @@ export type UseComboBoxDataProviderResult<TItem> = ComboBoxDataProvider<TItem> &
   refresh(): void;
 };
 
-export type ComboBoxFetchCallback<TItem> = (pageable: Pageable, filterString: string) => Promise<TItem[]>;
+export type ComboBoxFetchMethod<TItem> = (pageable: Pageable, filterString: string) => Promise<TItem[]>;
 
 function createComboBoxDataProvider<TItem>(
-  list: ComboBoxFetchCallback<TItem>,
+  list: ComboBoxFetchMethod<TItem>,
   sort: Sort | undefined,
 ): AbstractComboBoxDataProvider<TItem> {
   return new InfiniteComboBoxDataProvider(list, sort);
@@ -322,12 +332,24 @@ type ComboboxDataProviderOptions = {
   sort?: Sort;
 };
 
+/**
+ * Creates a data provider for a combo box component that fetches data using the provided fetch callback.
+ *
+ * @param fetch - the method that fetches the data for the grid. The method should return a promise that resolves to an array of items.
+ * @param dependencies - A list of all reactive values referenced inside of the fetch callback. A change to any of the listed values will cause the combo box to refresh its data.
+ * @returns a data provider that can be assigned to a <ComboBox> component usings its dataProvider property and additionally contains a refresh method that can be called to force a reload of the combo box data.
+ */
 export function useComboBoxDataProvider<TItem>(
-  list: ComboBoxFetchCallback<TItem>,
+  fetch: ComboBoxFetchMethod<TItem>,
   options?: ComboboxDataProviderOptions,
+  dependencies?: DependencyList,
 ): UseComboBoxDataProviderResult<TItem> {
   const [refreshCounter, setRefreshCounter] = useState(0);
-  const dataProvider = useMemo(() => createComboBoxDataProvider(list, options?.sort), [list, options?.sort]);
+
+  const dataProvider = useMemo(
+    () => createComboBoxDataProvider(fetch, options?.sort),
+    [options?.sort, ...(dependencies ?? [])],
+  );
 
   // Create a new data provider function reference when the refresh counter is incremented.
   // This effectively forces the combo box to reload
