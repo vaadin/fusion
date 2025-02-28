@@ -12,6 +12,23 @@ public class OrFilter extends Filter {
 
     private List<Filter> children;
 
+    /**
+     * Create an empty filter.
+     */
+    public OrFilter() {
+        // Empty constructor is needed for serialization
+    }
+
+    /**
+     * Create a filter with the given children.
+     *
+     * @param children
+     *            the children of the filter
+     */
+    public OrFilter(Filter... children) {
+        setChildren(List.of(children));
+    }
+
     public List<Filter> getChildren() {
         return children;
     }

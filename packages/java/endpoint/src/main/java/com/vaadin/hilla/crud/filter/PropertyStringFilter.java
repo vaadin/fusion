@@ -25,6 +25,32 @@ public class PropertyStringFilter extends Filter {
     private Matcher matcher;
 
     /**
+     * Create an empty filter.
+     */
+    public PropertyStringFilter() {
+        // Empty constructor is needed for serialization
+    }
+
+    /**
+     * Create a filter with the given property, matcher and filter value.
+     *
+     * @param propertyId
+     *            the property id, or a nested property path where each property
+     *            is separated by a dot
+     * @param matcher
+     *            the matcher to use when comparing the property value to the
+     *            filter value
+     * @param filterValue
+     *            the filter value to compare against
+     */
+    public PropertyStringFilter(String propertyId, Matcher matcher,
+            String filterValue) {
+        this.propertyId = propertyId;
+        this.matcher = matcher;
+        this.filterValue = filterValue;
+    }
+
+    /**
      * Gets the property, or nested property path, to filter by. For example
      * {@code "name"} or {@code "address.city"}.
      *
