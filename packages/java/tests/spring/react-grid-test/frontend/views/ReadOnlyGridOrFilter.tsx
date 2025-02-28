@@ -30,7 +30,7 @@ export default function ReadOnlyGridOrFilter(): React.JSX.Element {
           setFilter({ '@type': 'or', children: [firstNameFilter, lasttNameFilter]});
         }}
       ></TextField>
-      <AutoGrid service={PersonService} model={PersonModel} experimentalFilter={filter} noHeaderFilters />
+      <AutoGrid service={PersonService} model={PersonModel} experimentalFilter={filter} headerFilters={false} />
     </div>
     /* page size is defined only to make testing easier */
   );

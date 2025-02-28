@@ -19,7 +19,7 @@ import { AutoFormField, type AutoFormFieldProps, type FieldOptions } from './aut
 import css from './autoform.obj.css';
 import type { FormService } from './crud.js';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
-import { type ComponentStyleProps, registerStylesheet } from './util.js';
+import { type ComponentStyleProps, registerStylesheet, resolveProp } from './util.js';
 
 registerStylesheet(css);
 
@@ -206,6 +206,10 @@ export type AutoFormProps<M extends AbstractModel = AbstractModel> = ComponentSt
      * override the `delete` method in the backend Java service to either throw
      * an exception or annotate it with `@DenyAll` to prevent access.
      */
+    deleteButton?: boolean;
+    /**
+     * @deprecated Use `deleteButton` instead.
+     */
     deleteButtonVisible?: boolean;
     /**
      * A callback that will be called if an unexpected error occurs while
@@ -272,6 +276,7 @@ export function AutoForm<M extends AbstractModel>({
   style,
   id,
   className,
+  deleteButton,
   deleteButtonVisible,
   onDeleteSuccess,
   onDeleteError,
@@ -285,7 +290,7 @@ export function AutoForm<M extends AbstractModel>({
   const modelInfo = useMemo(() => new ModelInfo(model, itemIdProperty), [model]);
 
   const isEditMode = item !== undefined && item !== null && item !== emptyItem;
-  const showDeleteButton = deleteButtonVisible && isEditMode && modelInfo.idProperty;
+  const showDeleteButton = resolveProp(deleteButton, deleteButtonVisible) && isEditMode && modelInfo.idProperty;
   const isSubmitDisabled = !!disabled || (isEditMode && !form.dirty);
 
   useEffect(() => {

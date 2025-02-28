@@ -661,7 +661,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
       it('does not submit the form when enter key is pressed with delete or discard button focused', async () => {
         const service = personService();
-        const form = await populatePersonForm(1, { deleteButtonVisible: true }, undefined, undefined, service);
+        const form = await populatePersonForm(1, { deleteButton: true }, undefined, undefined, service);
 
         const submitSpy = sinon.spy(service, 'save');
         const deleteButton = await form.findButton('Delete...');
@@ -821,7 +821,7 @@ describe('@vaadin/hilla-react-crud', () => {
               service={service}
               model={PersonModel}
               item={item}
-              deleteButtonVisible={enableDelete}
+              deleteButton={enableDelete}
               onDeleteSuccess={onDeleteSuccessSpy}
               onDeleteError={onDeleteErrorSpy}
             />,
@@ -857,7 +857,7 @@ describe('@vaadin/hilla-react-crud', () => {
         // Model with JPA annotations
         let form = await FormController.init(
           user,
-          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={true} />).container,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButton={true} />).container,
         );
         expect(form.queryButton('Delete...')).to.exist;
 
@@ -865,12 +865,7 @@ describe('@vaadin/hilla-react-crud', () => {
         form = await FormController.init(
           user,
           render(
-            <AutoForm
-              service={service}
-              model={PersonWithSimpleIdPropertyModel}
-              item={person}
-              deleteButtonVisible={true}
-            />,
+            <AutoForm service={service} model={PersonWithSimpleIdPropertyModel} item={person} deleteButton={true} />,
           ).container,
         );
         expect(form.queryButton('Delete...')).to.exist;
@@ -878,14 +873,8 @@ describe('@vaadin/hilla-react-crud', () => {
         // Model without discernible ID property
         form = await FormController.init(
           user,
-          render(
-            <AutoForm
-              service={service}
-              model={PersonWithoutIdPropertyModel}
-              item={person}
-              deleteButtonVisible={true}
-            />,
-          ).container,
+          render(<AutoForm service={service} model={PersonWithoutIdPropertyModel} item={person} deleteButton={true} />)
+            .container,
         );
         expect(form.queryButton('Delete...')).not.to.exist;
       });
@@ -942,10 +931,35 @@ describe('@vaadin/hilla-react-crud', () => {
         expect(onDeleteErrorSpy).to.have.been.calledWith(sinon.match.hasNested('error.message', 'Delete failed'));
       });
 
+      it('hides delete button when deprecated deleteButtonVisible is true', async () => {
+        const form = await FormController.init(
+          user,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={false} />)
+            .container,
+        );
+        expect(form.queryButton('Delete...')).to.not.exist;
+      });
+
+      it('gives priority to deleteButton over deleteButtonVisible', async () => {
+        const form = await FormController.init(
+          user,
+          render(
+            <AutoForm
+              service={service}
+              model={PersonModel}
+              item={person}
+              deleteButton={false}
+              deleteButtonVisible={true}
+            />,
+          ).container,
+        );
+        expect(form.queryButton('Delete...')).to.not.exist;
+      });
+
       it('passes proper item ID when using a model using JPA annotations', async () => {
         const form = await FormController.init(
           user,
-          render(<AutoForm service={service} model={PersonModel} item={person} deleteButtonVisible={true} />).container,
+          render(<AutoForm service={service} model={PersonModel} item={person} deleteButton={true} />).container,
         );
         const deleteButton = await form.findButton('Delete...');
         await userEvent.click(deleteButton);
@@ -961,12 +975,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const form = await FormController.init(
           user,
           render(
-            <AutoForm
-              service={service}
-              model={PersonWithSimpleIdPropertyModel}
-              item={person}
-              deleteButtonVisible={true}
-            />,
+            <AutoForm service={service} model={PersonWithSimpleIdPropertyModel} item={person} deleteButton={true} />,
           ).container,
         );
         const deleteButton = await form.findButton('Delete...');
@@ -983,13 +992,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const form = await FormController.init(
           user,
           render(
-            <AutoForm
-              service={service}
-              model={PersonModel}
-              itemIdProperty="email"
-              item={person}
-              deleteButtonVisible={true}
-            />,
+            <AutoForm service={service} model={PersonModel} itemIdProperty="email" item={person} deleteButton={true} />,
           ).container,
         );
         const deleteButton = await form.findButton('Delete...');
@@ -1013,7 +1016,7 @@ describe('@vaadin/hilla-react-crud', () => {
           service={service}
           model={PersonModel}
           item={person}
-          deleteButtonVisible={true}
+          deleteButton={true}
           onDeleteSuccess={deleteSpy}
           // eslint-disable-next-line @typescript-eslint/unbound-method
           onDeleteError={({ error, setMessage }) => setMessage(`Got error: ${error.message}`)}

@@ -25,7 +25,7 @@ import { HeaderSorter } from './header-sorter';
 import { getDefaultProperties, ModelInfo, type PropertyInfo } from './model-info.js';
 import type AndFilter from './types/com/vaadin/hilla/crud/filter/AndFilter.js';
 import type FilterUnion from './types/com/vaadin/hilla/crud/filter/FilterUnion.js';
-import { isFilterEmpty, registerStylesheet } from './util';
+import { isFilterEmpty, negate, registerStylesheet, resolveProp } from './util';
 
 registerStylesheet(css);
 
@@ -92,7 +92,12 @@ interface AutoGridOwnProps<TItem> {
    */
   hiddenColumns?: string[];
   /**
+   * Enables (default) or disables header filters.
+   */
+  headerFilters?: boolean;
+  /**
    * Disables header filters, which are otherwise enabled by default.
+   * @Deprecated in favor of headerFilters.
    */
   noHeaderFilters?: boolean;
   /**
@@ -143,7 +148,7 @@ export type AutoGridProps<TItem> = GridProps<TItem> & Readonly<AutoGridOwnProps<
 interface ColumnConfigurationOptions {
   visibleColumns?: string[];
   hiddenColumns?: string[];
-  noHeaderFilters?: boolean;
+  headerFilters?: boolean;
   customColumns?: JSX.Element[];
   columnOptions?: Record<string, ColumnOptions>;
   rowNumbers?: boolean;
@@ -197,9 +202,10 @@ function addCustomColumns(
 
   // When using header filters, wrap custom columns into column groups and
   // move header text or renderer to group
-  const customColumns = options.noHeaderFilters
-    ? options.customColumns
-    : options.customColumns.map((column) => wrapCustomColumn(column, setColumnFilter, options));
+  const customColumns =
+    options.headerFilters === false
+      ? options.customColumns
+      : options.customColumns.map((column) => wrapCustomColumn(column, setColumnFilter, options));
 
   // When using a custom column order, insert custom columns into auto-generated
   // ones using their `key`
@@ -236,7 +242,7 @@ function useColumns(
 
     const { headerFilterRenderer, ...columnProps } = getColumnOptions(propertyInfo, customColumnOptions);
 
-    if (!options.noHeaderFilters) {
+    if (options.headerFilters !== false) {
       column = (
         <GridColumnGroup headerRenderer={HeaderSorter}>
           <GridColumn path={propertyInfo.name} headerRenderer={HeaderFilterWrapper} {...columnProps}></GridColumn>
@@ -305,6 +311,7 @@ function AutoGridInner<TItem>(
     experimentalFilter,
     visibleColumns,
     hiddenColumns,
+    headerFilters,
     noHeaderFilters,
     customColumns,
     columnOptions,
@@ -365,7 +372,7 @@ function AutoGridInner<TItem>(
   const children = useColumns(properties, setHeaderFilter, {
     visibleColumns,
     hiddenColumns,
-    noHeaderFilters,
+    headerFilters: resolveProp(headerFilters, negate(noHeaderFilters)),
     customColumns,
     columnOptions,
     rowNumbers,
@@ -376,11 +383,12 @@ function AutoGridInner<TItem>(
   });
 
   useEffect(() => {
+    const headerFiltersEnabled = resolveProp(headerFilters, negate(noHeaderFilters));
     // Remove all filtering if header filters are removed
-    if (noHeaderFilters) {
+    if (headerFiltersEnabled === false) {
       setInternalFilter({ '@type': 'and', children: [] });
     }
-  }, [noHeaderFilters]);
+  }, [headerFilters, noHeaderFilters]);
 
   useEffect(() => {
     // Log an error if totalCount or filteredCount is enabled but the service doesn't implement CountService

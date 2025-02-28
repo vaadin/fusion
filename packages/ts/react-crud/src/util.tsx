@@ -60,3 +60,24 @@ export function isFilterEmpty(filter: FilterUnion): boolean {
   }
   throw new Error(`Unknown filter type: ${'@type' in filter ? filter['@type'] : JSON.stringify(filter)} `);
 }
+
+/**
+ * Inverts a boolean value if not undefined.
+ *
+ * @param value - The boolean value to invert, or `undefined`.
+ * @returns The inverted boolean value, or `undefined` if the input was `undefined`.
+ */
+export function negate(value: boolean | undefined): boolean | undefined {
+  return value === undefined ? undefined : !value;
+}
+
+/**
+ * Resolves the first non-undefined value from the provided arguments.
+ *
+ * @typeParam T - A tuple type representing the types of the provided values.
+ * @param values - A rest parameter of values to be checked.
+ * @returns The first non-undefined value from the provided arguments, or undefined if all values are undefined.
+ */
+export function resolveProp<T extends unknown[]>(...values: T): T[number] | undefined {
+  return values.find((value) => value !== undefined);
+}

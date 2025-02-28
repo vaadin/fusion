@@ -22,7 +22,7 @@ export default function ReadOnlyGridSinglePropertyFilter(): React.JSX.Element {
           });
         }}
       ></TextField>
-      <AutoGrid service={PersonService} experimentalFilter={filter} model={PersonModel} noHeaderFilters />
+      <AutoGrid service={PersonService} experimentalFilter={filter} model={PersonModel} headerFilters={false} />
     </div>
     /* page size is defined only to make testing easier */
   );

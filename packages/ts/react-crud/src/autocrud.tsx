@@ -175,7 +175,7 @@ export function AutoCrud<TModel extends AbstractModel>({
   const autoForm = (
     <AutoForm
       id={autoFormProps.id ?? `auto-form-${id ?? autoCrudId}`}
-      deleteButtonVisible={true}
+      deleteButton={true}
       {...autoFormProps}
       disabled={!item}
       service={service}

@@ -9,7 +9,7 @@ import { CompanyService, PersonService } from 'Frontend/generated/endpoints.js';
 export default function ReadOnlyGridWithHeaderFilters(): React.JSX.Element {
   const [model, setModel] = useState<Array<DetachedModelConstructor<AbstractModel>>>([PersonModel]);
   const [service, setService] = useState<CrudService<any>>(PersonService);
-  const [noHeaderFilters, setNoHeaderFilters] = useState(false);
+  const [headerFilters, setHeaderFilters] = useState(true);
   return (
     <>
       <Button
@@ -27,12 +27,12 @@ export default function ReadOnlyGridWithHeaderFilters(): React.JSX.Element {
       </Button>
       <Button
         onClick={(e) => {
-          setNoHeaderFilters(!noHeaderFilters);
+          setHeaderFilters(!headerFilters);
         }}
       >
         Toggle header filters
       </Button>
-      <AutoGrid service={service} model={model[0]} noHeaderFilters={noHeaderFilters} />
+      <AutoGrid service={service} model={model[0]} headerFilters={headerFilters} />
     </>
   );
   /* page size is defined only to make testing easier */

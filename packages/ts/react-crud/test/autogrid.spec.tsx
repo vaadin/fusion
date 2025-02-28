@@ -66,7 +66,7 @@ async function assertColumns(grid: GridController, ...ids: string[]) {
 describe('@vaadin/hilla-react-crud', () => {
   describe('Auto grid', () => {
     function TestAutoGridNoHeaderFilters(customProps: Partial<AutoGridProps<Person>>) {
-      return <AutoGrid service={personService()} model={PersonModel} noHeaderFilters {...customProps} />;
+      return <AutoGrid service={personService()} model={PersonModel} headerFilters={false} {...customProps} />;
     }
 
     function TestAutoGrid(customProps: Partial<AutoGridProps<Person>>) {
@@ -478,7 +478,7 @@ describe('@vaadin/hilla-react-crud', () => {
             <AutoGrid
               service={personService()}
               model={PersonModel}
-              noHeaderFilters
+              headerFilters={false}
               multiSort
               multiSortPriority="append"
               {...customProps}
@@ -817,7 +817,7 @@ describe('@vaadin/hilla-react-crud', () => {
           };
           expect(service.lastFilter).to.deep.equal(expectedFilter1);
 
-          result.rerender(<AutoGrid service={service} model={PersonModel} noHeaderFilters />);
+          result.rerender(<AutoGrid service={service} model={PersonModel} headerFilters={false} />);
           grid = await GridController.init(result, user);
           expect(grid.getHeaderRows().length).to.equal(1);
 
@@ -826,6 +826,24 @@ describe('@vaadin/hilla-react-crud', () => {
             children: [],
           };
           expect(service.lastFilter).to.deep.equal(expectedFilter2);
+        });
+
+        it('disables header filters when deprecated noHeaderFilters is true', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(<TestAutoGrid service={service} model={PersonModel} noHeaderFilters />),
+            user,
+          );
+          expect(grid.getHeaderRows().length).to.equal(1);
+        });
+
+        it('gives priority to headerFilters over deprecated noHeaderFilters', async () => {
+          const service = personService();
+          const grid = await GridController.init(
+            render(<TestAutoGrid service={service} model={PersonModel} headerFilters={true} noHeaderFilters />),
+            user,
+          );
+          expect(grid.getHeaderRows().length).to.equal(2);
         });
 
         it('filters correctly after changing model', async () => {
@@ -1214,7 +1232,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
         // Without header filters
         result.unmount();
-        result = render(<TestAutoGrid noHeaderFilters columnOptions={{ firstName: { header: 'FIRSTNAME' } }} />);
+        result = render(<TestAutoGrid headerFilters={false} columnOptions={{ firstName: { header: 'FIRSTNAME' } }} />);
         grid = await GridController.init(result, user);
         expect(grid.getHeaderCellContent(0, 0).innerText).to.equal('FIRSTNAME');
       });
@@ -1289,7 +1307,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const grid = await GridController.init(
           render(
             <TestAutoGrid
-              noHeaderFilters
+              headerFilters={false}
               visibleColumns={['fullName', 'gender', 'email', 'secondFullName', 'vip', 'birthDate', 'shiftStart']}
               customColumns={[
                 <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
@@ -1322,7 +1340,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const grid = await GridController.init(
           render(
             <TestAutoGrid
-              noHeaderFilters
+              headerFilters={false}
               customColumns={[
                 <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
                 <GridColumn
@@ -1363,7 +1381,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const grid = await GridController.init(
           render(
             <TestAutoGrid
-              noHeaderFilters
+              headerFilters={false}
               visibleColumns={['fullName', 'gender', 'email', 'vip', 'birthDate', 'shiftStart']}
               customColumns={[
                 <GridColumn key="fullName" header="Full name" autoWidth renderer={FullNameRenderer}></GridColumn>,
@@ -1386,7 +1404,7 @@ describe('@vaadin/hilla-react-crud', () => {
         const grid = await GridController.init(
           render(
             <TestAutoGrid
-              noHeaderFilters
+              headerFilters={false}
               hiddenColumns={[
                 'email',
                 'someInteger',

@@ -250,7 +250,7 @@ describe('@vaadin/hilla-react-crud', () => {
 
     it('does not render a delete button when hiding the delete button through form props', async () => {
       const { grid, form } = await CrudController.init(
-        render(<TestAutoCrud formProps={{ deleteButtonVisible: false }} />),
+        render(<TestAutoCrud formProps={{ deleteButton: false }} />),
         user,
       );
       await grid.toggleRowSelected(1);
